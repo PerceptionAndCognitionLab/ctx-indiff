@@ -1,0 +1,72 @@
+---
+title: "Individual differences, Model Comparison"
+author: "Haaf & Rouder""
+output:
+  pdf_document: papaja::apa6_pdf
+  html_document: default
+  word_document: papaja::apa6_word
+---
+
+```{r 'BayesFactorsExample'}
+pTN <- predHTNorm[t1, t2]
+pN <- predHNorm[t1, t2]
+p0 <- predNull[t1, t2]
+p1 <- predOne[t1, t2]
+```
+
+A critical question is how to state evidence for the four theoretically-informed models.  One popular approach is to use Bayes rule to compare models, and the resulting model-comparison statistic is the *Bayes factor* [@Edwards:etal:1963; @Laplace:1986; @Jeffreys:1961; @Kass:Raftery:1995; @Rouder:etal:2009a].  Bayes rule for the comparison of any two models, $\calM_a$ vs. $\calM_b$, is 
+
+\begin{equation}\label{bayesrule}
+\frac{P(\calM_a \mid \bfY)}{P(\calM_b \mid \bfY)} = \frac{P(\bfY \mid \calM_a)}{P(\bfY \mid \calM_b)} \times \frac{P(\calM_a)}{P(\calM_b)},
+\end{equation}
+
+where the term on the left-hand side is the posterior odds for the models, and the term on the far right, $\frac{P(\calM_a)}{P(\calM_b)}$, is the prior odds.  The term $\frac{P(\bfY \mid \calM_a)}{P(\bfY \mid \calM_b)}$ is the Bayes factor, and it describes how the data have changed the analysts' beliefs.  We, along with several others, argue the Bayes factor is the *evidence* from data for competing models, and is the appropriate target of inquiry.  See @Edwards:etal:1963, @Jeffreys:1961, and @Morey:etal:2016 for expanded discussions.
+
+The numerator and denominator of the Bayes factor describe the probability of observing data conditional on model $\calM_a$ and model $\calM_b$, respectively.  These probability statements may be termed the *predictions* of the respective models.  They may be expressed for all possible data points before the data are observed.  The Bayes factor therefore denotes how well the observed data are predicted under one model relative to another.  In practice, the Bayes factor has two roles: It describes the evidence as change of beliefs and describes how well the models predicted the observed data. The equivalence of these roles leads to the deep insight that in Bayesian model comparison, evidence for competing models is the ratio of how well each predicts the observed data [@Rouder:etal:2016a].
+
+To display the predictions of the models, we focus on two hypothetical individuals much as we did in specifying the models.  The left column in Figure `r fig.modelplot` shows the model specification for set values of $\nu$ and $\eta$. However, when marginalized across $\nu$ and $\eta$, there is correlation among individual effects as shown in Figure `r fig.marginals`B. The right column of Figure `r fig.modelplot` shows the corresponding predictions for sample effects, which shows the correlation. Panel $A_2$, shows the predicted sample effects for the unstructured model $\calM_u$ from panel $A_1$; panel $B_2$ shows the predicitons for the positive-effects model, $\calM_+$; panel $C_2$ shows the predicted individual effects for the common-effect model, $\calM_1$ and, finally, $D_2$ shows the distribution of predicted effects for the null model, $\calM_0$. The more constraint within a model, the greater the predictive density on concordant points and the less density on discordant ones.
+
+Once the predictions are derived, model comparison is as simple as comparing these predictive densities at observed values.  Suppose the individuals have observed effects of $d_1 = 150$ ms and $d_2 = 100$ ms.  These values are shown by the point in panels $A_2$ through $D_2$.  The density for $(150, 100)$ under the unstructured model $\calM_u$ is `r paste(round(pN, 5))`, the density under the positive-effects model, $\calM_+$, is `r paste(round(pTN, 5))`. The ratio of these two densities is `r round(pTN/pN)`-to-1 in favor of $\calM_+$. This ratio is a Bayes factor and is denoted $B_{+u}$.  The comparison of all models is done in the same manner.
+
+Although Bayes factors are conceptually simple, they are often computationally inconvenient in real-world applications with mixed models.   The target quantity, the probability of data conditional on a model, is rexpressed using The Law of Total Probability as
+\begin{equation} \label{bfInt}
+P(\bfY \mid \calM) = \int_{\bfxi \in \Xi} P(\bfY|\bfxi)P(\bfxi)d\bfxi,
+\end{equation}
+where $\bfxi$ is a vector of parameters from parameter space $\Xi$.  The terms in the integrand are straightforward to compute.  The difficulty comes from evaluating the integral itself.  The integration is multidimensional ranging over the dimensionality of the parameters.  There are often no closed form solutions, and brute-force numerical methods fail in large-data settings because the to-be-integrated multivariate function is very peaked and narrow.  The numerical method must find the "needle in the haystack." Often, it is difficult to assess whether the outputs approximate the true value of the integral.  As a result, obtaining computationally convenient Bayes factor algorithms in mixed settings remains a timely and topical in Bayesian research.  
+
+In the previous section, we present a $g$-prior specification.  These types of specifications were first proposed by @Zellner:Siow:1980 and subsequently studied by several others including @Bayarri:Garcia-Donato:2007, @Liang:etal:2008, @Rouder:etal:2012, @Zellner:1986.  The particular form we adopt was first proposed by @Rouder:etal:2012 who developed models with multiple $g$-parameters for mixed ANOVA designs with fixed and random effects.   The key advantage of this form, and the reason we use it here, is that we can ensure accurate evaluation of the needed integrals.  
+
+Integration proceeds as follows: The full vector of parameters is the concatination of the $g$-parameters, denoted $\bfg=(g_{\alpha}, g_\nu, g_\theta)$, and the remaining parameters, denoted $\bflambda=(\bfalpha, \bftheta, \mu, \nu, \sigma^2)$, where $\bfalpha$ and $\bftheta$ are the collection of individual intercept and slope parameters, respectively.  With this notation
+\[
+P(\bfY \mid \calM) = \int_{\bfg} \int_{\bflambda} P(\bfY|\bfg,\bflambda) P(\bflambda) d\bflambda P(\bfg) d\bfg 
+\]
+The inner integral, denoted $T(\bfg) = \int_{\bflambda} P(\bfY | \bfg,\bflambda) P(\bflambda) d\bflambda$ may be solved analytically.  The solution is developed in Rouder et al. (2012, p. 361-362) and implemented in Morey and Rouder's BayesFactor package for R [@R-BayesFactor].  Hence,
+\[
+P(\bfY \mid \calM) = \int_{\bfg} T(\bfg) P(\bfg)d\bfg.
+\]
+This integral is over only three dimensions in the current design.  More importantly, $T(\bfg)$ varies smoothly across the the paramater space of $\bfg$, and the evaluation may be performed to high precision by Monte Carlo sampling [see @Rouder:etal:2012 for expanded analysis]. This approach in implemented in BayesFactor package using the nWayAOV command separately for the unstructured model, the common-effect model, and the the null model.  
+
+Unfortunately, for the positive model, it is not possible to integrate $\bflambda$ analytically due to the range restrictions on $\bftheta$.  Instead, we follow the *encompassing* approach discussed by Klugkist and colleagues [@Klugkist:Hoijtink:2007; @Klugkist:etal:2005].  In our case, where the prior on the positive model is a truncated version of the prior on the unstructured model, a simple counting approach within MCMC-sampling works well.  The main idea is as follows:
+
+As seen in (\ref{bayesrule}), the Bayes factor is the ratio of the posterior odds to the prior odds.  These odds may be given by
+\[
+\frac{P(\calM_+|\bfY)}{P(\calM_u|\bfY)} = P(\bftheta>\bf0|\bfY,\calM_u),
+\]
+and 
+\[
+\frac{P(\calM_+)}{P(\calM_u)} = P(\bftheta>\bf0|\calM_u).
+\]
+where $\bftheta>\bf0$ refers to event that each element of $\bftheta$ is greater than zero. The Bayes factor, the ratio, is given by 
+\[
+B_{+u} = \frac{P(\bftheta>0|\bfY,\calM_u)}{P(\bftheta>0|\calM_u)}.
+\]
+Restated, the Bayes factor is the posterior probability that all effects are positive relative to the prior probability of the same event. 
+
+Computation of these probabilities is straightforward in MCMC sampling.  Let $\bftheta[m]$ denote a vector of samples on the $m$th iteration under the unstructured model.  The $m$th iteration is considered evidential of the positive-effects model if all $I$ elements of $\bftheta[m]$ are positive and not otherwise.  Let $n_1^+$ be the number of evidential iterations conditional on data, and let $n_0^+$ be the same from the prior.  Then, the Bayes factor is,
+\[
+B_{+u} = \frac{n_1^+}{n_0^+}.
+\]
+
+Additional derivations and development of this encompassing approach may be found in @Klugkist:etal:2005.  To compute the Bayes factor of the positive-effect model to the remaining models, we use the well-known transitivity of Bayes factors [@Rouder:Morey:2012].
+
+

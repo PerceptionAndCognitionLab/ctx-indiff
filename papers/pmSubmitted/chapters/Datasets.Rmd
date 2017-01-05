@@ -1,0 +1,133 @@
+---
+title: "Individual differences, Model Comparison"
+author: "Haaf & Rouder""
+output:
+  pdf_document: papaja::apa6_pdf
+  html_document: default
+  word_document: papaja::apa6_word
+---
+
+```{r 'modelanalysis', child="../analysis/modelanalysis.Rmd"}
+```
+
+To demonstrate the need for the development of models like the above, we use them to assess the structure of effects in seven existing data sets that cover three common experimental tasks with massively repeated designs. The tasks are common inference phenomena. The first phenomenon is the aforementioned Stroop interference effect.  We analyzed three data sets, one from @vonBastian:etal:2015 and two from @Pratte:etal:2010a.
+
+The second phenomenon we analyzed is Simon interference [@Simon:1969].  In a Simon interference task, participants are asked to identify a property of a stimulus, say its color.  There are always two choices, and say for the color example, patches might be presented in red or green.  Participants press buttons either on the left or right, and an example might be to press a left key for red and a right key for green.  The interference comes from the spatial placement of the patch.  Patches are placed on the left or right: a congruent patch in this case is a red patch on the left and the congruency is between the spatial placement and the left-key response.  Likewise a green patch on the right is congruent.  Incongruent patches are red patches on the right or green patches on the left because the side of stimulus placement is opposite (contralateral to) the side of the response.  Simon effects are relatively small, say about 30 ms, but the phenomenon is nonetheless robust and well studied [@Lu:Proctor:1995].  We analyzed three existing Simon interference data sets including one from @vonBastian:etal:2015 and two from @Pratte:etal:2010a.  
+
+The third phenomenon we analyzed is an Eriksen flanker task [@Erikson1974] from @vonBastian:etal:2015.  In the Eriksen flanker task, the interference comes from distractors that are placed around a target stimulus. For example, participants identify a centrally located character, e.g. a consonant like "H". Those targets are surrounded by distractors that could either match the target character, say another consonant "K", or they mismatch, say a vowel like "E". 
+
+Table `r tab.sum` provides an overview over all seven data sets. For the derivations of the used $F$-statistic and the confidence intervals in Figures `r fig.stroop` to `r fig.flanker`, see Appendix A. The cleaning strategy for the RT data for all seven data sets is provided in Appendix B.
+
+##Data Set 1
+
+```{r}
+filename <- curl("https://raw.githubusercontent.com/PerceptionCognitionLab/data0/master/contexteffects/FlankerStroopSimon/LEF_stroop.csv")
+
+clean.crit.1 <- cleaning(filename, stroop, cond.exclude = 3, rts = c(.2, 2), acc.exclude = 0)
+```
+
+Set 1 is the Stroop task data from @vonBastian:etal:2015.  The task used is commonly called a *number Stroop task* [@west:2005 refer to the task as counting task], and it goes as follows:  On each trial, participants saw a string of digits.  In each string, the digits were always replicates, say "22" or "444", and the lengths varied from one digit to four digits.  The participants task was to report the length, for example, the correct report for "444" is 3.  In the congruent condition, the length and the digits matched; e.g., "22" and "4444." " In the incongruent condition, the length and digits mismatched, e.g., "44" and "2222." Additionally, participants saw neutral trials that consisted of unrelated symbols, e.g. "###". In total, 121 participants each responded to 48 congruent, 48 incongruent and 48 neutral trials. For the following analysis, we only used data from the congruent and the incongruent conditions.
+
+The mean effect and the individual effects of all 121 participants are shown in Figure `r fig.stroop`$\mbox{A}_1$. The dashed line is the mean effect $\bar{d} = `r round(effect.1)`$ ms, which corresponds to an effect size of $d = `r round(ES.1, 2)`$.  The points show ordered individual effects, and the grey outer surface denotes the 95\% confidence intervals for each individual (see the Appendix for derivations).  The graph shows the same information as Figure `r fig.example`.  A one-way random-effects ANOVA (see Appendix for derivations) reveals individual variability, $F(`r prep.1$I - 1`, `r prep.1$R - prep.1$I * 2`)= `r round(f.stat.1, 2)`$, $p \approx `r paste(p.1)`$.
+
+##Data Set 2
+
+```{r}
+filename <- curl("https://raw.githubusercontent.com/PerceptionCognitionLab/data0/master/contexteffects/StroopSimonAPP2010/allsi2.dat")
+clnames <- c('exp', 'sub', 'blk', 'trial', 'color', 'distract', 'cond', 'resp', 'acc', 'rt', 'errorTotal')
+
+clean.crit.2 <- cleaning(filename
+                         , dat.stroop.p1
+                         , cond.exclude = 2
+                         , rts = c(.2, 2)
+                         , acc.exclude = 0
+                         , colnms = clnames
+                         , exp.include = 1
+                         , trials = 6)
+```
+
+Set 2 was conducted by @Pratte:etal:2010a (Experiment 1, Stroop task). The task they used is a classical Stroop task: Participants were asked to identify the color of the presented color words, e.g. the word "RED" presented in blue. In the congruent condition, presentation color and word meaning matched, e.g. "BLUE" presented in blue. In the incongruent condition, they did not match, e.g. "RED" presented in blue. In the neutral condition, a neutral word was presented in a color, e.g. "XXXX" presented in blue. 38 participants responded to 168 trial for each of those conditions. For the following analysis, we only used data from the congruent and the incongruent condition.
+
+The mean effect and the individual effects are shown in Figure `r fig.stroop`$\mbox{B}_1$. The dashed line is the mean effect $\bar{d} = `r round(effect.2)`$ ms, with a corresponding effect size of $d = `r ES.2`$.  The points in the figure show ordered individual effects, and the grey outer surface denotes the 95\% confidence intervals for each individual.  A one-way random-effects ANOVA shows individual variability, $F(`r prep.2$I - 1`, `r prep.2$R - prep.2$I * 2`) = `r round(f.stat.2, 2)`$, $p \approx `r paste(p.2)`$.
+
+##Data Set 3
+
+```{r}
+filename <- curl("https://raw.githubusercontent.com/PerceptionCognitionLab/data0/master/contexteffects/StroopSimonAPP2010/allsi7.dat")
+clnames <- c('sub','blk','blktype','trial','word','location','cond','resp','acc','rt','errorTotal')
+
+clean.crit.3 <- cleaning(filename
+                         , dat.stroop.p2
+                         , blktype.include = 1
+                         , rts = c(.2, 2)
+                         , acc.exclude = 0
+                         , colnms = clnames
+                         , trials = 6)
+```
+
+Set 3 was originally conducted by @Pratte:etal:2010a. The data used for this analysis stems from the five Stroop task blocks of Experiment 2 of the original study. In this task, the stimuli were the words *left* and *right*, presented on the left or the right side of the screen. Participants were asked to identify the position of the word while ignoring the meaning of the word. A congruent trial occured when position of the word and word meaning corresponded; an incongruent trial emerged when position and word meaning did not correspond. In total, 38 participants responded to 180 congruent and 180 incongruent trials.
+
+Mean and individual effects are shown in Figure `r fig.stroop`$\mbox{C}_1$. The dashed line represents the mean effect $\bar{d} = `r round(effect.3)`$ ms, with a corresponding effect size of $d = `r ES.3`$.  The points in the figure show ordered individual effects, and the grey outer surface denotes the 95\% confidence intervals for each individual.  A one-way random-effects ANOVA reveals no significant individual variability, $F(`r prep.3$I - 1`, `r prep.3$R - prep.3$I * 2`) = `r round(f.stat.3, 2)`$, $p \approx `r paste(p.3)`$.
+
+##Data Set 4
+
+```{r}
+filename <- curl("https://raw.githubusercontent.com/PerceptionCognitionLab/data0/master/contexteffects/FlankerStroopSimon/LEF_simon.csv")
+
+clean.crit.4 <- cleaning(filename, simon, cond.exclude = 3, rts = c(.2, 2), acc.exclude = 0)
+```
+
+Set 4 is the Simon task data from @vonBastian:etal:2015. In this task, either a red or a green circle was presented to the participants. The circles were either presented on the right or on the left side of the screen. Participants were asked to respond with the left-arrow key to green circles and with the right-arrow key to red circles. In the congruent condition, position of the circle and response position match. In the incongruent condition, position of the circle and response position do not match. In total, 121 participants responded to 150 congruent trials and 50 incongruent trials.
+
+Figure `r fig.simon`$\mbox{A}_1$ shows mean and individual effects. The dashed line shows the large mean effect $\bar{d} = `r effect.3`$ ms, with a corresponding effect size of $d = `r ES.4`$.  The points in the figure show ordered individual effects, and the grey outer surface denotes each individual's 95\% confidence interval.  A one-way random-effects ANOVA reveals individual variability, $F(`r prep.4$I - 1`, `r prep.4$R - prep.4$I * 2`) = `r round(f.stat.4, 2)`$, $p \approx `r paste(p.4)`$.
+
+##Data Set 5
+
+```{r}
+filename <- curl("https://raw.githubusercontent.com/PerceptionCognitionLab/data0/master/contexteffects/StroopSimonAPP2010/allsi2.dat")
+clnames <- c('exp', 'sub', 'blk', 'trial', 'color', 'distract', 'cond', 'resp', 'acc', 'rt', 'errorTotal')
+
+clean.crit.5 <- cleaning(filename
+                         , dat.simon.p1
+                         , cond.exclude = 2
+                         , rts = c(.2, 2)
+                         , acc.exclude = 0
+                         , colnms = clnames
+                         , exp.include = 0
+                         , trials = 6)
+```
+
+Data Set 5 is from experiment 2 conducted by @Pratte:etal:2010a (Simon task). In this task, participants saw either a green or a red target stimulus on each trial. These targets were either presented on the left or the right side of the screen. The participants were instructed to press a key with their right hand for green and another key with their left hand for red stimuli. In a congruent trial, target position and response position match. In an incongruent trial, target position and response position mismatch. For this set, 38 participants completed 252 incongruent and 252 congruent trials.
+
+Mean and individual effects are shown in Figure `r fig.simon`$\mbox{B}_1$. The dashed line is the mean effect $\bar{d} = `r effect.5`$ ms, with a corresponding effect size of $d = `r ES.5`$.  The points in the figure show ordered individual effects.  A one-way random-effects ANOVA shows individual variability, $F(`r prep.5$I - 1`, `r prep.5$R - prep.5$I * 2`) = `r round(f.stat.5, 2)`$, $p \approx `r paste(p.5)`$.
+
+##Data Set 6
+
+```{r}
+filename <- curl("https://raw.githubusercontent.com/PerceptionCognitionLab/data0/master/contexteffects/StroopSimonAPP2010/allsi7.dat")
+clnames <- c('sub','blk','blktype','trial','word','location','cond','resp','acc','rt','errorTotal')
+
+clean.crit.6 <- cleaning(filename
+                         , dat.simon.p2
+                         , blktype.include = 0
+                         , rts = c(.2, 2)
+                         , acc.exclude = 0
+                         , colnms = clnames
+                         , trials = 6)
+```
+
+This set is from experiment 1 conducted by @Pratte:etal:2010a (Simon task). In this task, the target stimuli were the words "left" and "right". These words were either presented on the left or the right side of the screen. The participants were instructed to press a key with their right hand for the word "right" and another key with their left hand for the word "left". In a congruent trial, target position and word meaning match. In an incongruent trial, target position and word meaning mismatch. In total, 38 participants completed 180 incongruent and 180 congruent trials.
+
+Figure `r fig.simon`$\mbox{C}_1$ shows mean and individual effects. The dashed line represents the mean effect $\bar{d} = `r effect.6`$ ms, with a corresponding effect size of $d = `r ES.6`$. The points in the figure show ordered individual effects.  A one-way random-effects ANOVA reveals individual variability, $F(`r prep.6$I - 1`, `r prep.6$R - prep.6$I * 2`) = `r round(f.stat.6, 2)`$, $p \approx `r paste(p.6)`$.
+
+##Data Set 7
+
+```{r}
+filename <- curl("https://raw.githubusercontent.com/PerceptionCognitionLab/data0/master/contexteffects/FlankerStroopSimon/LEF_flanker.csv")
+
+clean.crit.7 <- cleaning(filename, flanker, cond.exclude = 3, rts = c(.2, 2), acc.exclude = 0)
+```
+
+Set 7 is the Eriksen flanker task in @vonBastian:etal:2015. In the task used, participants saw a string of seven characters. All of these characters were identical except for the one in the middle. The task was to decide whether this centrally located character was a vowel, e.g. "S", or a consonant, e.g. "A" or "E". The flanking six characters were as well either vowels, consonants or neither, e.g. "#". In the congruent condition, the flanking characters match the central character, e.g. "AAAEAAA". In the incongruent condition, the flanking characters and the central character mismatch, e.g. "SSSESSS". In the neutral condition, the central character was flanked by "#", e.g. "###E###". In total, 121 participants responded to 48 trials for each of those conditions. For the following analysis, we used data from the congruent and the incongruent condition.
+
+The mean effect and the individual effects are shown in Figure `r fig.flanker`A. The dashed line represents the mean effect $\bar{d} = `r effect.7`$ ms, with a corresponding effect size of $d = `r ES.7`$.  The points in the figure show ordered individual effects, and the grey outer surface denotes the 95\% confidence intervals for each individual.  A one-way random-effects ANOVA shows no significant individual variability, $F(`r prep.7$I - 1`, `r prep.7$R - prep.7$I * 2`) = `r round(f.stat.7, 2)`$, $p \approx `r paste(p.7)`$.

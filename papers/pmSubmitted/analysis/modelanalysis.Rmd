@@ -1,0 +1,304 @@
+---
+title: "Individual differences, Model Analysis"
+author: "Haaf & Rouder""
+output:
+  pdf_document: papaja::apa6_pdf
+  html_document: default
+  word_document: papaja::apa6_word
+---
+
+```{r 'loaddata', warning= FALSE, message= FALSE, cache=TRUE}
+set.seed(123)
+SourceURL <- "https://raw.githubusercontent.com/PerceptionCognitionLab/data0/master/contexteffects/FlankerStroopSimon/cleaning.R"
+source_url(SourceURL)
+stroop$sub <- stroop$ID
+simon$sub <- simon$ID
+flanker$sub <- flanker$ID
+
+SourceURL <- "https://raw.githubusercontent.com/PerceptionCognitionLab/data0/master/contexteffects/StroopSimonAPP2010/cleaning.R"
+source_url(SourceURL)
+```
+
+```{r 'model_comparison_stroop', warning= FALSE, message= FALSE, cache = TRUE}
+prep.1 <- prep.models(stroop$sub, stroop$cond)
+bf.1 <- makeBF(stroop$rt, .16, .1, prep = prep.1, keep = keep)
+
+f.stat.1 <- myF(data.frame(y = stroop$rt, cond = stroop$cond, sub = stroop$sub))
+p.1 <- round((1 - pf(f.stat.1, prep.1$I - 1, prep.1$R - prep.1$I * 2)), 3)
+means.1 <- tapply(stroop$rt, list(stroop$sub, stroop$cond), mean)
+effect.1 <- diff(colMeans(means.1)) * 1000
+ES.1 <- t.test(means.1[, 2], means.1[, 1], paired = TRUE)$statistic/sqrt(nrow(means.1))
+new.es.1 <- bf.1$mean / bf.1$sd
+```
+
+```{r 'model_comparison_stroop1_pratte', warning= FALSE, message= FALSE, cache = TRUE}
+cond <- ifelse(dat.stroop.p1$cond == 1, 1, 2)
+prep.2 <- prep.models(dat.stroop.p1$sub, cond)
+bf.2 <- makeBF(dat.stroop.p1$rt, .16, .1, prep = prep.2, keep = keep)
+
+f.stat.2 <- myF(data.frame(y = dat.stroop.p1$rt, cond = cond, sub = dat.stroop.p1$sub))
+p.2 <- round((1 - pf(f.stat.2, prep.2$I - 1, prep.2$R - prep.2$I * 2)), 3)
+means.2 <- tapply(dat.stroop.p1$rt, list(dat.stroop.p1$sub, cond), mean)
+effect.2 <- diff(colMeans(means.2)) * 1000
+ES.2 <- t.test(means.2[, 2], means.2[, 1], paired = TRUE)$statistic/sqrt(nrow(means.2))
+new.es.2 <- bf.2$mean / bf.2$sd
+```
+
+```{r 'model_comparison_stroop2_pratte', warning= FALSE, message= FALSE, cache = TRUE}
+cond <- ifelse(dat.stroop.p2$cond == 1, 1, 2)
+prep.3 <- prep.models(dat.stroop.p2$sub,cond)
+bf.3 <- makeBF(dat.stroop.p2$rt, .16, .1, prep = prep.3, keep = keep)
+
+f.stat.3 <- myF(data.frame(y = dat.stroop.p2$rt, cond = dat.stroop.p2$cond, sub = dat.stroop.p2$sub))
+p.3 <- round((1 - pf(f.stat.3, prep.3$I - 1, prep.3$R - prep.3$I * 2)), 3)
+means.3 <- tapply(dat.stroop.p2$rt, list(dat.stroop.p2$sub, cond), mean)
+effect.3 <- diff(colMeans(means.3)) * 1000
+ES.3 <- t.test(means.3[, 2], means.3[, 1], paired = TRUE)$statistic/sqrt(nrow(means.3))
+new.es.3 <- bf.3$mean / bf.3$sd
+```
+
+```{r 'stroop_plot_model_comp', fig.height= 7, fig.width= 6, fig.cap= "{\\footnotesize Empirical and Bayesian analyses for the Stroop paradigm (Data Sets 1-3.) Each row shows one data set. The left column shows the ordered observed effects, $d_i$, as points. The shaded area denotes the associated 95\\% confidence intervals, and the dashed line is the mean effect. The right column shows the ordered Bayesian estimates of individual effects, $\\theta_i$. The points are the estimates from the unstructured model. The red line is the estimate from the constant-effect model. The observered effects, $d_i$ are included as grey line for comparison. In Panel $\\mbox{A}_2$, the Bayesian analysis for Data Set 1, there is a sizable difference between the observed and estimated effects, and this difference is indicative of hierarchical shrinkage. Almost all the variability in the individual effects is seemingly from sample noise.}", fig.align='center'}
+layout(mat = matrix(1:6, nrow = 3, byrow = TRUE))
+par(mar=c(3,3,1,1), mgp = c(2,1,0))
+
+#stroop Oberauer
+plot_delta_i(stroop
+             , "sub"
+             , "cond"
+             , "rt"
+             , "trial"
+             , congruent = 1
+             , main = expression(A[1]* "."))
+text(prep.1$I, -.1, "Data Set 1", pos = 2, cex=1.15)
+
+i.theta0 <- prep.1$I + 2
+i.theta <- (prep.1$I + 3):(2 * prep.1$I + 2)
+myTheta <- bf.1$est.full[keep, i.theta] + bf.1$est.full[keep, i.theta0]
+myTheta0 <- bf.1$est.one[keep, i.theta0]
+plot_freq_bayes(stroop
+               , sub_var = "sub"
+               , cond_var = "cond"
+               , congruent = 1
+               , rt_var = "rt"
+               , trial_var = "trial"
+               , thet.n = myTheta
+               , thet.1 = myTheta0
+               , main = expression(A[2] * ".")
+)
+  
+
+#stroop Pratte 1
+plot_delta_i(dat.stroop.p1
+             , "sub"
+             , "cond"
+             , "rt"
+             , "trial"
+             , congruent = 1
+             , main = expression(B[1]* "."))
+text(prep.2$I, -.1, "Data Set 2", pos = 2, cex=1.15)
+
+i.theta0 <- prep.2$I + 2
+i.theta <- (prep.2$I + 3):(2 * prep.2$I + 2)
+myTheta <- bf.2$est.full[keep, i.theta] + bf.2$est.full[keep, i.theta0]
+myTheta0 <- bf.2$est.one[keep, i.theta0]
+plot_freq_bayes(dat.stroop.p1
+               , sub_var = "sub"
+               , cond_var = "cond"
+               , congruent = 1
+               , rt_var = "rt"
+               , trial_var = "trial"
+               , thet.n = myTheta
+               , thet.1 = myTheta0
+               , main = expression(B[2] * ".")
+)
+
+#stroop Pratte 2
+plot_delta_i(dat.stroop.p2
+             , "sub"
+             , "cond"
+             , "rt"
+             , "trial"
+             , congruent = 1
+             , main = expression(C[1]* "."))
+text(prep.3$I, -.1, "Data Set 3", pos = 2, cex=1.15)
+
+i.theta0 <- prep.3$I + 2
+i.theta <- (prep.3$I + 3):(2 * prep.3$I + 2)
+myTheta <- bf.3$est.full[keep, i.theta] + bf.3$est.full[keep, i.theta0]
+myTheta0 <- bf.3$est.one[keep, i.theta0]
+plot_freq_bayes(dat.stroop.p2
+               , sub_var = "sub"
+               , cond_var = "cond"
+               , congruent = 1
+               , rt_var = "rt"
+               , trial_var = "trial"
+               , thet.n = myTheta
+               , thet.1 = myTheta0
+               , main = expression(C[2] * ".")
+)
+```
+
+
+```{r 'model_comparison_simon', warning= FALSE, message= FALSE, cache = TRUE}
+prep.4 <- prep.models(simon$sub, simon$cond)
+bf.4 <- makeBF(simon$rt, .16, .1, prep = prep.4, keep = keep)
+
+f.stat.4 <- myF(data.frame(y = simon$rt, cond = simon$cond, sub = simon$sub))
+p.4 <- round((1 - pf(f.stat.4, prep.4$I - 1, prep.4$R - prep.4$I * 2)), 3)
+means.4 <- tapply(simon$rt, list(simon$sub, simon$cond), mean)
+effect.4 <- diff(colMeans(means.4)) * 1000
+ES.4 <- t.test(means.4[, 2], means.4[, 1], paired = TRUE)$statistic/sqrt(nrow(means.4))
+new.es.4 <- bf.4$mean / bf.4$sd
+```
+
+```{r 'model_comparison_simon1_pratte', warning= FALSE, message= FALSE, cache = TRUE}
+cond <- ifelse(dat.simon.p1$cond == 1, 1, 2)
+prep.5 <- prep.models(dat.simon.p1$sub, cond)
+bf.5 <- makeBF(dat.simon.p1$rt, .16, .1, prep = prep.5, keep = keep)
+
+f.stat.5 <- myF(data.frame(y = dat.simon.p1$rt, cond = cond, sub = dat.simon.p1$sub))
+p.5 <- round((1 - pf(f.stat.5, prep.5$I - 1, prep.5$R - prep.5$I * 2)), 3)
+means.5 <- tapply(dat.simon.p1$rt, list(dat.simon.p1$sub, cond), mean)
+effect.5 <- diff(colMeans(means.5)) * 1000
+ES.5 <- t.test(means.5[, 2], means.5[, 1], paired = TRUE)$statistic/sqrt(nrow(means.5))
+new.es.5 <- bf.5$mean / bf.5$sd
+```
+
+```{r 'model_comparison_simon2_pratte', warning= FALSE, message= FALSE, cache = TRUE}
+cond <- ifelse(dat.simon.p2$cond == 1, 1, 2)
+prep.6 <- prep.models(dat.simon.p2$sub,cond)
+bf.6 <- makeBF(dat.simon.p2$rt, .16, .1, prep = prep.6, keep = keep)
+
+f.stat.6 <- myF(data.frame(y = dat.simon.p2$rt, cond = dat.simon.p2$cond, sub = dat.simon.p2$sub))
+p.6 <- round((1 - pf(f.stat.6, prep.6$I - 1, prep.6$R - prep.6$I * 2)), 3)
+means.6 <- tapply(dat.simon.p2$rt, list(dat.simon.p2$sub, cond), mean)
+effect.6 <- diff(colMeans(means.6)) * 1000
+ES.6 <- t.test(means.6[, 2], means.6[, 1], paired = TRUE)$statistic/sqrt(nrow(means.6))
+new.es.6 <- bf.6$mean / bf.6$sd
+```
+
+```{r 'simon_plot_model_comp', fig.height= 7, fig.width= 6, fig.cap= "{\\footnotesize Empirical and Bayesian analyses for the Simon paradigm (Data Sets 4-6). The figure has the same format as Figure 5. The left column shows the ordered observed effects, $d_i$. The right column shows the ordered Bayesian estimates of individual effects, $\\theta_i$.}", fig.align='center'}
+layout(mat = matrix(1:6, nrow = 3, byrow = TRUE))
+par(mar=c(3,3,1,1), mgp = c(2,1,0))
+
+#stroop Oberauer
+plot_delta_i(simon
+             , "sub"
+             , "cond"
+             , "rt"
+             , "trial"
+             , congruent = 1
+             , main = expression(A[1]* "."))
+text(prep.4$I, -.1, "Data Set 4", pos = 2, cex=1.15)
+
+i.theta0 <- prep.4$I + 2
+i.theta <- (prep.4$I + 3):(2 * prep.4$I + 2)
+myTheta <- bf.4$est.full[keep, i.theta] + bf.4$est.full[keep, i.theta0]
+myTheta0 <- bf.4$est.one[keep, i.theta0]
+plot_freq_bayes(simon
+               , sub_var = "sub"
+               , cond_var = "cond"
+               , congruent = 1
+               , rt_var = "rt"
+               , trial_var = "trial"
+               , thet.n = myTheta
+               , thet.1 = myTheta0
+               , main = expression(A[2] * ".")
+)
+  
+
+#stroop Pratte 1
+plot_delta_i(dat.simon.p1
+             , "sub"
+             , "cond"
+             , "rt"
+             , "trial"
+             , congruent = 1
+             , main = expression(B[1]* "."))
+text(prep.5$I, -.1, "Data Set 5", pos = 2, cex=1.15)
+
+i.theta0 <- prep.5$I + 2
+i.theta <- (prep.5$I + 3):(2 * prep.5$I + 2)
+myTheta <- bf.5$est.full[keep, i.theta] + bf.5$est.full[keep, i.theta0]
+myTheta0 <- bf.5$est.one[keep, i.theta0]
+plot_freq_bayes(dat.simon.p1
+               , sub_var = "sub"
+               , cond_var = "cond"
+               , congruent = 1
+               , rt_var = "rt"
+               , trial_var = "trial"
+               , thet.n = myTheta
+               , thet.1 = myTheta0
+               , main = expression(B[2] * ".")
+)
+
+#stroop Pratte 2
+plot_delta_i(dat.simon.p2
+             , "sub"
+             , "cond"
+             , "rt"
+             , "trial"
+             , congruent = 1
+             , main = expression(C[1]* "."))
+text(prep.6$I, -.1, "Data Set 6", pos = 2, cex=1.15)
+
+i.theta0 <- prep.6$I + 2
+i.theta <- (prep.6$I + 3):(2 * prep.6$I + 2)
+myTheta <- bf.6$est.full[keep, i.theta] + bf.6$est.full[keep, i.theta0]
+myTheta0 <- bf.6$est.one[keep, i.theta0]
+plot_freq_bayes(dat.simon.p2
+               , sub_var = "sub"
+               , cond_var = "cond"
+               , congruent = 1
+               , rt_var = "rt"
+               , trial_var = "trial"
+               , thet.n = myTheta
+               , thet.1 = myTheta0
+               , main = expression(C[2] * ".")
+)
+```
+
+
+```{r 'model_comparison_flanker', warning= FALSE, message= FALSE, cache = TRUE}
+prep.7 <- prep.models(flanker$sub, flanker$cond)
+bf.7 <- makeBF(flanker$rt, .16, .1, prep = prep.7, keep = keep)
+
+f.stat.7 <- myF(data.frame(y = flanker$rt, cond = flanker$cond, sub = flanker$sub))
+p.7 <- round((1 - pf(f.stat.7, prep.7$I - 1, prep.7$R - prep.7$I * 2)), 3)
+means.7 <- tapply(flanker$rt, list(flanker$sub, flanker$cond), mean)
+effect.7 <- diff(colMeans(means.7)) * 1000
+ES.7 <- t.test(means.7[, 2], means.7[, 1], paired = TRUE)$statistic/sqrt(nrow(means.7))
+new.es.7 <- bf.7$mean / bf.7$sd
+```
+
+```{r 'flanker_plot_model_comp', fig.height= 2.7, fig.width= 6.5, fig.cap= "{\\footnotesize Empirical and Bayesian analyses for the Eriksen flanker paradigm (Data Set 7). The figure has the same format as Figure 5. The left column shows the ordered observed effects, $d_i$. The right column shows the ordered Bayesian estimates of individual effects, $\\theta_i$. The mean effect in panel $\\mbox{A}_1$ is very close to zero. The parameter estimates for the unstructured model in panel $\\mbox{A}_2$ are close to zero as well, indicating that almost all the variability in the individual effects is seemingly from sample noise.}", fig.align='center'}
+layout(mat = matrix(1:2, nrow = 1, byrow = TRUE))
+par(mar=c(3,3,1,1), mgp = c(2,1,0))
+
+plot_delta_i(flanker
+             , "sub"
+             , "cond"
+             , "rt"
+             , "trial"
+             , congruent = 1
+             , main = expression(A[1]* "."))
+text(prep.7$I, -.1, "Data Set 7", pos = 2, cex=1.15)
+
+i.theta0 <- prep.7$I + 2
+i.theta <- (prep.7$I + 3):(2 * prep.7$I + 2)
+myTheta <- bf.7$est.full[keep, i.theta] + bf.7$est.full[keep, i.theta0]
+myTheta0 <- bf.7$est.one[keep, i.theta0]
+plot_freq_bayes(flanker
+               , sub_var = "sub"
+               , cond_var = "cond"
+               , congruent = 1
+               , rt_var = "rt"
+               , trial_var = "trial"
+               , thet.n = myTheta
+               , thet.1 = myTheta0
+               , main = expression(A[2] * ".")
+)
+```
+
+
+
