@@ -19,13 +19,13 @@ plot_delta_i <- function(data
   }
   for(i in sub_num){
     data_i <- subset(data, data[,sub_var] == i)
-    rts <- split(data_i, data_i$cond)
+    rts <- split(data_i, data_i[,cond_var])
     t <- t.test(rts$i[, rt_var], rts$c[, rt_var])
     K <- tapply(data_i[, rt_var], data_i[, cond_var], length)
     ci <- (sqrt(sum(tapply(data_i[, rt_var], data_i[, cond_var], var)/K))*qt(.975,min(K)-1))
     sd_within <- sqrt(sum(tapply(data_i[, rt_var], data_i[, cond_var], var)/tapply(data_i[, rt_var], data_i[, cond_var], length)))
     diff <- t$estimat[1]-t$estimat[2]
-    delta[i, 2:6] <- c(diff
+    delta[delta$sub == i, 2:6] <- c(diff
                        , t$conf.int[1:2]
                        , diff - sd_within
                        , diff + sd_within)
@@ -45,12 +45,6 @@ plot_delta_i <- function(data
        , yaxt = 'n'
   )
   title(main, line = -1)
-  
-  neg <- delta_i$delta < 0
-  points(x = 1: sum(neg)
-         , y = delta_i$delta[neg]
-         , pch = 19
-         , col = "darkorchid4")
   
   axis(side = 1
        , at = c(1, nrow(delta_i))
@@ -84,6 +78,11 @@ plot_delta_i <- function(data
          , y = delta_i$delta
          , col = "gray40"
          , pch = 19)
+  neg <- delta_i$delta < 0
+  points(x = 1: sum(neg)
+         , y = delta_i$delta[neg]
+         , pch = 19
+         , col = "darkorchid4")
   
   abline(h = 0, col = "gray40")
   

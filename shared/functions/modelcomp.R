@@ -12,7 +12,7 @@ prep.models <- function(sub, cond){
   
   gMap.full <- c(rep(0, I), 1, rep(2, I))
   
-  X.one <- matrix(nrow=R,ncol=I+2,0)
+  X.one <- matrix(nrow = R, ncol = I + 2, 0)
   for (r in 1:R){
     X.one[r, 1] <- 1
     X.one[r, sub[r] + 1] <- 1

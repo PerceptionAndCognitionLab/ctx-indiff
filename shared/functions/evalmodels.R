@@ -65,9 +65,9 @@ plot_freq_bayes <- function(data
   }
   for(i in sub_num){
     data_i <- subset(data, data[,sub_var] == i)
-    rts <- split(data_i, data_i$cond)
+    rts <- split(data_i, data_i[,cond_var])
     t <- t.test(rts$i[, rt_var], rts$c[, rt_var])
-    delta[i, 2:4] <- c((t$estimat[1]-t$estimat[2]), t$conf.int[1:2])
+    delta[delta$sub == i, 2:4] <- c((t$estimat[1]-t$estimat[2]), t$conf.int[1:2])
   }
   delta$th1 <- mean(thet.1) * 1000
   delta$thn <- colMeans(thet.n) * 1000
