@@ -1,0 +1,8 @@
+*.Rproj.user
+*.Rhistory
+*.RData
+*.tiff
+*.eps
+.Rproj.user
+*.rdb
+*.rdx
