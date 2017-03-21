@@ -3,7 +3,4 @@
 *.RData
 *.tiff
 *.eps
-.Rproj.user
-*.rdb
-*.rdx
-
+**/figure-latex

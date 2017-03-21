@@ -1,0 +1,268 @@
+---
+title: "Individual differences, prediction plot"
+author: "Haaf & Rouder""
+output:
+  pdf_document: papaja::apa6_pdf
+  html_document: default
+  word_document: papaja::apa6_word
+---
+
+```{r 'modelbytwo', fig.height= 7, fig.width= 3.5, fig.cap= "{\\footnotesize  Model specification and resulting predictions for two participants.  Panel $\\mbox{A}_1$ shows the specification for the unstructured model $\\calM_u$ Here, $\\nu$ and $\\eta$ are fixed and set to 0 ms and 230 ms, respectively.  Without structure, the bivariate density is that of a normal.  Panel $\\mbox{B}_1$ shows the specification for the positive-effects model, and the bivariate density is restricted to the upper-right quandrant where effects are positive for both participants.  Panel $\\mbox{C}_1$ shows the specification for the common-effect model; when the two participants are constrained to have the same effect, the resulting density is a line on the bivariate space.  Panel $\\mbox{D}_1$ shows the specification for the null model, the point denotes that both participants have zero effect.  The right column, Panels $\\mbox{A}_2$ - $\\mbox{D}_2$, show the bivariate predictions for observed effects for the respective models.  Correlations in panels $\\mbox{A}_2$ and $\\mbox{B}_2$ result from prior variation in the overall mean for the hierarchical specification.}", fig.align='center', cache = TRUE}
+sd0 <- .07
+sd1 <- .04
+
+theta1 <- seq(-.2,.2,.01)
+theta2 <- seq(-.2,.2,.01)
+
+norm.1 <- function(theta1, theta2, Sigma) dnorm(theta1, 0,Sigma) * dnorm(theta2, 0, Sigma)
+normBi.1 <- function(theta1, theta2, Sigma) dmvnorm(cbind(theta1, theta2), c(0,0), Sigma)
+normTBi.1 <- function(theta1, theta2, Sigma) dtmvnorm(cbind(theta1, theta2), c(0,0), Sigma, lower = rep(0, 2))
+normTrunc.1=function(theta1, theta2, Sigma) dtnorm(theta1, 0, Sigma, lower = 0) * dtnorm(theta2, 0, Sigma, lower=0)
+
+norm.fun <- function(theta1, theta2, Sigma, norm = FALSE) 
+{
+  if(norm == FALSE)	temp <- outer(theta1, theta2, norm.1, Sigma)
+  else if(norm == "bi") temp <- outer(theta1, theta2, normBi.1, Sigma)
+  else if(norm == "trunc") temp <- outer(theta1, theta2, normTrunc.1, Sigma)
+  else if(norm == "tbi") temp <- outer(theta1, theta2, normTBi.1, Sigma)
+  tot <- sum(temp)
+  return(temp/tot)
+}
+
+#null model
+priorNull <- norm.fun(theta1, theta2, Sigma = .002, norm = FALSE)
+predNull <- norm.fun(theta1, theta2, Sigma = sd1, norm = FALSE)
+
+#one-effect
+priorOne <- norm.fun(theta1 
+                     , theta2
+                     , Sigma=matrix(ncol = 2, c(sd0^2, sd0^2.001, sd0^2.001, sd0^2))
+                     , norm = "bi")
+predOne <- norm.fun(theta1
+                    , theta2
+                    , Sigma = matrix(ncol = 2, c(sd0^2 + sd1^2, sd0^2, sd0^2, sd0^2 + sd1^2))
+                    , norm = "bi")
+
+#trunc one effect
+priorTOne <- norm.fun(theta1 
+                      , theta2
+                      , Sigma = matrix(ncol = 2, c(sd0^2, sd0^2.001, sd0^2.001, sd0^2))
+                      , norm = "tbi")
+
+
+predTOne <- norm.fun(theta1
+                     , theta2
+                     , Sigma = matrix(ncol = 2, c(sd0^2 + sd1^2, sd0^2, sd0^2, sd0^2 + sd1^2))
+                     , norm = "tbi")
+
+f.Y <- function(mu, x, y) dnorm(x, mu, sd1) * dnorm(y, mu, sd1) * 2*  dnorm(mu, 0, sd0)
+# convolution integral
+f.Z <- function(x, y) integrate(f.Y, 0, Inf, x = x, y = y)$value
+
+for(i in 1 : length(theta1))
+  for(j in 1 : length(theta2)){
+    predTOne[i, j] <- f.Z(theta1[i], theta2[j])
+  }
+
+tot <- sum(predTOne)
+predTOne <- predTOne/tot
+
+#truncModel
+priortNorm <- norm.fun(theta1, theta2, Sigma = sd0, norm = "trunc")
+
+f.X <- function(theta1) dnorm(theta1, 0, sd1)   
+f.Y <- function(theta1) dtnorm(theta1, 0, sd0, lower = 0)  
+# convolution integral
+f.Z <- function(z) integrate(function(x, z) f.Y(z - x) * f.X(x), -Inf, Inf, z)$value
+f.Z <- Vectorize(f.Z)  
+temp <- outer(f.Z(theta1), f.Z(theta1))
+tot <- sum(temp)
+predtNorm <- temp/tot
+
+#normal prior
+priorNorm <- norm.fun(theta1, theta2, Sigma = sd0)
+predNorm <- norm.fun(theta1, theta2, Sigma = sqrt(sd0^2 + sd1^2))
+
+eta=.8
+
+kern = convKernel(sigma = 8,k="gaussian")
+
+nrmlz=function(mat)
+{
+	tot=sum(mat)
+	mat/tot
+}
+
+normBi=function(theta1,theta2,Sigma) 
+{
+	temp=outer(theta1,theta2,normBi.1,Sigma)
+	tot=sum(temp)
+	return(temp/tot)
+}
+
+priorHNorm=normBi(theta1,theta2,Sigma=matrix(ncol=2,c(sd0^2,eta*sd0^2,eta*sd0^2,sd0^2)))
+predHNorm=nrmlz(applyFilter(priorHNorm,kern))
+
+priorHTNorm=4*priorHNorm
+for (i in 1:length(theta1))
+for (j in 1:length(theta2))
+{
+	priorHTNorm[i,j]=priorHTNorm[i,j]*as.integer(theta1[i]>0 & theta2[j]>0)
+}
+
+predHTNorm=nrmlz(applyFilter(priorHTNorm,kern))
+
+####GRAPH####
+layout(mat = matrix(1:10, nrow = 5), width = c(1/2, 1/2), heights = c(.1, rep(0.225, 4))
+       )
+par(mar=c(3,3,2,1), mgp = c(2,1,0))
+top <- max(predNull, predOne, priortNorm)
+
+# plot(1
+#      , type="n"
+#      , xlab=""
+#      , ylab=""
+#      , axes = FALSE
+#      , xlim=c(0, 0)
+#      , ylim=c(0, 0)
+#      , main = "Models")
+
+plot.new()
+mtext("Models", side = 1)
+
+######PRIORS##########
+image(theta1
+      , theta2
+      , priorNorm
+      , col = grey((256:0)/256)
+      , zlim = c(0, top)
+      , axes = FALSE
+      , xlab = ""
+      , ylab = expression(paste("True effect ", theta[2]))
+      , bty = "n"
+      , main = expression(A[1]* ".")
+)
+axis(1, at = seq(-.2, .2, .2), labels = seq(-200, 200, 200))
+axis(2, at = seq(-.2, .2, .2), labels = seq(-200, 200, 200))
+# abline(h = 0, col = "gray70")
+# abline(v = 0, col = "gray70")
+
+image(theta1
+      , theta2
+      , priortNorm
+      , col = grey((256:0)/256)
+      , zlim = c(0, top)
+      , xlab = ""
+      , ylab = expression(paste("True effect ", theta[2]))
+      , axes = FALSE
+      , bty = "n"
+      , main = expression(B[1]* ".")
+)
+axis(1, at = seq(-.2, .2, .2), labels = seq(-200, 200, 200))
+axis(2, at = seq(-.2, .2, .2), labels = seq(-200, 200, 200))
+
+image(theta1
+      , theta2
+      , priorOne
+      , col = grey((256:0)/256)
+      , xlab = ""
+      , ylab = expression(paste("True effect ", theta[2]))
+      , axes = FALSE
+      , bty = "n"
+      , main = expression(C[1]* ".")
+)
+axis(1, at = seq(-.2, .2, .2), labels = seq(-200, 200, 200))
+axis(2, at = seq(-.2, .2, .2), labels = seq(-200, 200, 200))
+
+image(theta1
+      , theta2
+      , priorNull
+      , col = grey((256:0)/256)
+      , xlab = expression(paste("True effect ", theta[1]))
+      , ylab = expression(paste("True effect ", theta[2]))
+      , axes = FALSE
+      , bty = "n"
+      , main = expression(D[1]* ".")
+)
+axis(1, at = seq(-.2, .2, .2), labels = seq(-200, 200, 200))
+axis(2, at = seq(-.2, .2, .2), labels = seq(-200, 200, 200))
+points(0, 0, pch = 20)
+
+########PREDICTION############
+
+plot.new()
+mtext("Predictions", side = 1)
+
+image(theta1
+      , theta2
+      , predHNorm
+      , col = grey((256:0)/256)
+      , xlab = ""
+      , ylab = expression(paste("Sample effect ", d[2]))
+      , axes = FALSE
+      , bty = "n"
+      , main = expression(A[2]* ".")
+      , zlim=c(0,max(predHNorm)*4)
+)
+axis(1, at = seq(-.2, .2, .2), labels = seq(-200, 200, 200))
+axis(2, at = seq(-.2, .2, .2), labels = seq(-200, 200, 200))
+points(.1, .05, pch = 19, col = 'darkred')
+
+image(theta1
+      , theta2
+      , predHTNorm
+      , col = grey((256:0)/256)
+      , xlab = ""
+      , ylab =  expression(paste("Sample effect ", d[2]))
+      , axes = FALSE
+      , bty = "n"
+      , main = expression(B[2]* ".")
+      , zlim=c(0,max(predHTNorm)*4)
+)
+axis(1, at = seq(-.2, .2, .2), labels = seq(-200, 200, 200))
+axis(2, at = seq(-.2, .2, .2), labels = seq(-200, 200, 200))
+points(.1, .05, pch = 19, col = 'darkred')
+
+image(theta1
+      , theta2
+      , predOne
+      , col = grey((256:0)/256)
+      , zlim = c(0, top)
+      , xlab = ""
+      , ylab = expression(paste("Sample effect ", d[2]))
+      , axes = FALSE
+      , bty = "n"
+      , main = expression(C[2]* ".")
+)
+axis(1, at = seq(-.2, .2, .2), labels = seq(-200, 200, 200))
+axis(2, at = seq(-.2, .2, .2), labels = seq(-200, 200, 200))
+points(.1, .05, pch = 19, col = 'darkred')
+
+image(theta1
+      , theta2
+      , predNull
+      , col = grey((256:0)/256)
+      , zlim = c(0, top)
+      , axes = FALSE
+      , xlab = expression(paste("Sample effect ", d[1]))
+      , ylab = expression(paste("Sample effect ", d[2]))
+      , bty = "n"
+      , main = expression(D[2]* ".")
+)
+axis(1, at = seq(-.2, .2, .2), labels = seq(-200, 200, 200))
+axis(2, at = seq(-.2, .2, .2), labels = seq(-200, 200, 200))
+# abline(h = 0, col = "gray70")
+# abline(v = 0, col = "gray70")
+points(.1, .05, pch = 19, col = 'darkred')
+
+
+######END FIG#################
+
+t1 <- 31
+t2 <- 27
+
+# predNull[t1, t2]
+# predOne[t1, t2]
+
+fig <- 2
+```

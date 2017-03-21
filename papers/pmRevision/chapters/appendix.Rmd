@@ -1,0 +1,66 @@
+---
+title: "Individual differences, prediction plot"
+author: "Haaf & Rouder""
+output:
+  pdf_document: papaja::apa6_pdf
+  html_document: default
+  word_document: papaja::apa6_word
+---
+
+## Appendix A.
+In this appendix we derive confidence intervals and the $F$-test.  Let $Y_{ijk}$ denote the $k$th response for the $i$th participant in the $j$th conditions, $i=1,\ldots,I$, $j=1,2$, $k=1,\ldots, K_{ij}$.  
+
+###Individuals' Confidence Intervals
+The goal here is to derive confidence intervals for each individual in isolation without any model-based pooling.  Let $M_{i1}$ and $M_{i2}$ denote the sample means in the congruent and incongruent conditions, respectively, for the $i$th participant.  Let $V_{i1}$ and $V_{i2}$ denote the corresponding sample variances.  The sample effect, $d_i$, is $d_i=M_{i2}-M_{i1}$ and standard error of this effect, denoted $s_{di}$ is 
+\[
+s_{di} = \left(\frac{V_{i1}}{K_{i1}}+\frac{V_{i2}}{K_{i2}}\right)^{1/2}.
+\]
+This standard error may be used to compute individuals' CIs in the usual manner [@Hays:1994].
+
+###*F*-test
+The goal is to derive a one-way, random-effects $F$-test to assess whether there is any variation across individuals. This derived value can be interpreted as a proper $F$ if equal sample sizes are assumed (i.e. equal trial number in congruent and incongruent conditions).
+The effect, $d_i=M_{i2}-M_{i1}$, is distributed as 
+\[
+d_i \sim \mbox{Normal}\left(\mu_{i2}-\mu_{i1},\frac{\sigma^2}{K_{i1}}+\frac{\sigma^2}{K_{i2}}\right),
+\]  
+where $\mu_{i2}$ and $\mu_{i1}$ are true conditions means for the $i$th person, and $\sigma^2$ is the variability in any observation around its true mean.   This expression may be expressed as 
+
+\begin{equation}\label{diffModel}
+d_i \sim \mbox{N}\left(\mu_{i2}-\mu_{i1},\frac{\sigma^2}{K^*_i}\right),
+\end{equation}
+
+where $K^*_i$ is the *effective sample size* for the $i$th individual:
+\[
+K^*_i=\frac{K_{i1}K_{i2}}{K_{i1}+K_{i2}}.
+\]
+Consequently,
+\[
+\sqrt{K^*_i} d_i \sim \mbox{Normal}(\sqrt{K^*_i}(\mu_{i2}-\mu_{i1}),\sigma^2).
+\]
+Let $d^*_i=d_i\sqrt{K^*_i}$.  Consider the case that  $\sqrt{K^*_i}$ is approximately constant for all individuals, that is the design is approximately balanced. Then, under the null that $\mu_{i2}-\mu_{i1}$ is constant for all individuals, the following expression is a between-participant estimator of $\sigma^2$:
+\[
+s^2_1 =\frac{\sum_i(d^*_i-\bar{d^*})^2}{(I-1)},
+\]
+where $\bar{d^*}$ is the mean of all $d^*_i$.  The degrees-of-freedom associated with this estimator is $I-1$.
+
+The expression for within-subject variation follows from the usual considerations:
+\[
+s^2_2 = \frac{\sum_{ijk} (Y_{ijk}-M_{ij})^2}{\sum_{ij}(K_{ij}-1)}=\frac{\sum_{ijk} (Y_{ijk}-M_{ij})^2}{N-IJ},
+\]
+where $N=\sum_{ij}K_{ij}$ is the total number of observations.  The degrees-of-freedom associated with this estimator is $N-IJ$.
+
+With these expressions, the $F$ statistic is
+\[
+F = \frac{s^2_1}{s^2_2},
+\]
+which under the null is distributed as an $F$ distribution with $\nu_1=I-1$ and $\nu_2=N-IJ$ degrees-of-freedom. Of course, this computation only holds for nearly balanced designs. Fortunately, deviations from balance only occurs when participants make errors, which is not that common here (see Appendix B).
+
+##Appendix B.
+
+Neither of the authors discussed their strategies for cleaning the data in the original articles, even though there were clear outliers in the data. The cleaning code of @Pratte:etal:2010a was available to us. The authors used three relatively strict criteria to decide which data points should be excluded and we followed all three criteria for Data Sets 2, 3, 5, and 6 and two of the criteria for Data Sets 1, 4, and 7 (data from @vonBastian:etal:2015). The criteria were
+
+I.  All incorrect trials were removed.  
+II.  We removed all trials with RTs less than .2 sec on the grounds that these times are too fast to be related to the processes of interest. We removed all trials with RTs greater than 2 sec on the grounds that these times are too slow to be related to the processes of interest.  
+III.  We removed the first five trials in each experimental block, accounting for the familiarization with the task.
+
+These removals comprised between 3 % and 13 % of the originally collected trials in each Data Set. Table `r tab.delete` shows those removals for all Data Sets broken down for the three criteria. The data of all seven sets and the cleaning code are available at [https://github.com/PerceptionCognitionLab/data0/tree/master/contexteffects](https://github.com/PerceptionCognitionLab/data0/tree/master/contexteffects).

@@ -1,0 +1,147 @@
+---
+title: "Developing Constraint in Bayesian Mixed Models"
+shorttitle: "Developing Constraint in Bayesian Mixed Models"
+author: 
+  - name: Julia M. Haaf
+    affiliation: 1
+    corresponding: yes    # Define only one corresponding author
+    email: jhaaf@mail.missouri.edu
+    address: 205 McAlester Hall, University of Missouri, Columbia, MO 65211
+  - name: Jeffrey N. Rouder
+    affiliation: "1"
+affiliation:
+  - id: 1
+    institution: University of Missouri
+
+abstract: "Model comparison in Bayesian mixed models is becoming popular in psychological science.  Here we develop a set of nested models that account for order restrictions across individuals in psychological tasks.  An order-restricted model addresses the question 'Does Everybody', as in, 'Does everybody show the usual Stroop effect', or 'Does everybody respond more quickly to intense noises than subtle ones.'  The crux of the modeling is the instantiation of 10s or 100s of order restrictions simultaneously, one for each participant.  To our knowledge, the problem is intractable in frequentist contexts but relatively straightforward in Bayesian ones.  We develop a Bayes-factor model-comparison strategy using Zellner and colleagues' default $g$-priors appropriate for assessing whether effects obey equality and order restrictions.  We apply the methodology to seven data sets from Stroop, Simon, and Eriksen interference tasks.  Not too surprisingly, we find that everybody Stroops---that is, for all people congruent colors are truly named more quickly than incongruent ones.  But, perhaps surprisingly, we find these order constraints are violated for some people in the Simon task, that is, for these people spatially incongruent responses occur truly more quickly than congruent ones!  Implications of the modeling and conjectures about the differences in task dynamics are discussed."
+  
+keywords: "Bayesian mixed models, Bayes factors, Individual differences, Order constraints, Equality constraints, Priming"
+
+class: man
+lang: american
+figsintext: no
+lineno: no
+bibliography:
+  - references.bib
+  - lab.bib
+  - r-references.bib
+header-includes:
+   - \usepackage{bm}
+   - \usepackage{pcl}
+   - \usepackage{amsmath}
+   - \usepackage{setspace}
+output: papaja::apa6_pdf
+---
+
+```{r message = FALSE, warning = FALSE}
+library("papaja")
+apa_prepare_doc() # Prepare document for rendering
+knitr::opts_chunk$set(cache=TRUE)
+```
+
+```{r 'settings', echo = FALSE, message = FALSE, cache = FALSE}
+library(MCMCpack)
+library(msm)
+library(curl)
+library("plotrix")
+library("tmvtnorm")
+library('spatialfil')
+library(devtools)
+library(BayesFactor)
+library(LaplacesDemon)
+
+source("../../shared/functions/lib.R", chdir = TRUE)
+source("../../shared/functions/lib_2.R")
+source("../../shared/functions/extendAssign.R")
+source("../../shared/functions/getdata.R")
+source("../../shared/functions/cleaningCrit.R")
+source("../../shared/functions/modelcomp.R")
+source("../../shared/functions/delta_per_subject_functions.R")
+source("../../shared/functions/evalmodels.R")
+
+# r_refs(file = "r-references.bib")
+my_citation <- cite_r(file = "r-references.bib")
+
+keep <- 1001:10000
+set.seed(123)
+```
+
+```{r 'figure_refs'}
+g(fig.trunc
+  , fig.example
+  , fig.modelplot
+  , fig.marginals
+  , fig.stroop
+  , fig.simon
+  , fig.flanker
+  , fig.chainstability
+  , fig.delta) %=% 1:9
+
+g(tab.sum
+  , tab.bf
+  , tab.sens
+  , tab.delete) %=% 1:4
+```
+
+#Introduction
+
+```{r 'Intro', child="chapters/Intro.Rmd"}
+```
+
+#Models of Individual Variation
+
+```{r 'Models', child="chapters/Models.Rmd"}
+```
+
+```{r 'marginals', fig.height= 4, fig.width= 7, fig.cap= "Marginal prior distributions for two different individuals. Values are shown in time units (ms) and in effect-size units (relative to $\\sigma = 300$ ms). A. Distribution of $\\alpha$ parameters (intercepts), B. Distribution of $\\theta$ parameters (effects). Correlation in B comes from the hierarchical structure on effects.", fig.align='center', cache = FALSE}
+source("figures/marginals2.R")
+```
+
+#Model Comparison
+
+```{r 'ModelComp', child="chapters/ModelComp.Rmd"}
+```
+
+#Seven Data Sets 
+```{r 'datasets', child="chapters/Datasets.Rmd"}
+```
+
+#Analyses and Results
+
+To illusrate the advantages of the Bayesian modeling approach, we analyze the seven data sets with the four Bayesian models: the unstructured model, $\calM_u$; the positive-effects model, $\calM_+$; the common-effect model, $\calM_1$; and the null model, $\calM_0$. 
+
+##Parameter Estimation
+```{r 'estimation', child="chapters/Estimation.Rmd"}
+```
+
+## Model Comparison
+```{r 'comparison', child="chapters/Comparison.Rmd"}
+```
+
+# Sensitivity to Prior Settings
+```{r 'sensitivity', child="chapters/Sensitivity.Rmd"}
+```
+
+# General Discussion
+```{r 'deltaplot', fig.height= 4, fig.width= 7, fig.cap= "Delta plots for Data Sets 1-6. A. The three Stroop task data (Sets 1-3). All Stroop interference data sets show a positive slope as is often found in these kinds of tasks. B. The Stroop task data (Sets 4-6). Two of the three data sets show a negative slope.", fig.align='center', cache = FALSE}
+source("figures/deltaplot.R")
+```
+
+```{r 'discussion', child="chapters/Discussion.Rmd"}
+```
+
+\clearpage
+
+#Appendix
+```{r 'appendix', child="chapters/appendix.Rmd"}
+```
+
+\clearpage
+
+# References
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+```{r 'tables', child="figures/tables.Rmd"}
+```

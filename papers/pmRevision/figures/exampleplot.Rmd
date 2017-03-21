@@ -1,0 +1,114 @@
+---
+title: "Individual differences, example plot"
+author: "Haaf & Rouder""
+output:
+  pdf_document: papaja::apa6_pdf
+  html_document: default
+  word_document: papaja::apa6_word
+---
+
+```{r emp, fig.height= 4, fig.width= 7, fig.cap= "Observed difference scores, $d_i$, for 121 individuals. The scores are ordered from smallest to largest, and the open circles denote negatively valued differences.  The dashed horizontal line is the mean difference, 65 ms, and the error bars are 95\\% confidence intervals for each individual.", fig.align='center'}
+
+##Stroop
+x <- curl("https://raw.githubusercontent.com/PerceptionCognitionLab/data0/master/contexteffects/FlankerStroopSimon/LEF_stroop.csv")
+stroop <- read.csv2(x, header = TRUE, dec = ".")
+
+stroop$cond <- as.numeric(stroop$congruency)  #congruent -> 1, incongruent -> 2, neutral -> 3
+ntrial <- length(stroop[stroop$ID == stroop$ID[1], 1])
+nsub <- length(unique(stroop$ID))
+stroop$trial <- rep(1:ntrial, nsub)
+stroop$sub <- rep(1:nsub, each = ntrial)
+stroop$rt <- stroop$RT/1000
+
+exclude = matrix(c(
+  "accuracy", "==", "1",
+  "cond", "!=", "3"), ncol = 3, byrow = TRUE)
+
+stroop.dat <- readdata(stroop
+                 , v.y = "rt" #Y/rt
+                 , v.cond = "cond" #condition variable
+                 , cond.congruent = 1 #label of congruent cond
+                 , v.sub = "sub" #Subject variable
+                 , unit = "sec" #Which unit is  it in? Standard min
+                 , trial = FALSE #Remove fist trials/block -> 1:x?
+                 , exclude = exclude
+                 , exp.pratte = FALSE
+)
+
+data.stroop <- stroop.dat$dat
+data.stroop$rt <- data.stroop$rt*1000
+
+  sub_num <- unique(data.stroop$sub)
+  delta <- data.frame(sub = sub_num, delta = NA, lower = NA, upper = NA)
+    data.stroop$cond <- ifelse(data.stroop$cond == 1, 0, 1)
+    data.stroop$cond <- factor(data.stroop$cond, labels = c("c","i"))
+  for(i in sub_num){
+    data_i <- subset(data.stroop, data.stroop$sub == i)
+    rts <- split(data_i, data_i$cond)
+    t <- t.test(rts$i[, "rt"], rts$c[, "rt"])
+    delta[i, 2:4] <- c((t$estimat[1]-t$estimat[2]), t$conf.int[1:2])
+  }
+  delta_i <- delta[order(delta$delta),]
+
+par(mfrow = c(1,1), mar=c(4,4.5,1,1), mgp = c(2.2,1,0))
+  #PLOT DELTA WITH REJECTED NULL
+  plot(x = 1: nrow(delta_i)
+       , y = delta_i$delta
+       , ylim = c(min(delta_i$lower), max(delta_i$upper))
+       , pch = 19
+       , col = "gray40"
+       , ylab = expression(paste("Observed effect ", d[i], " (ms)"))
+       , xlab = "Participants"
+       , frame.plot = FALSE
+       , axes = FALSE
+  )
+  
+      plotCI(x = 1: nrow(delta_i)
+         , y = delta_i$delta
+         , ui= delta_i$upper
+         , li= delta_i$lower
+         , add = TRUE
+         , sfrac = 1/150
+         , pch = NA
+         , col = "gray40")
+  
+  axis(side = 1
+       , at = c(1, nrow(delta_i)))
+    axis(side = 2
+       , at = seq(-100, 200, 100))
+  
+  diff <- stroop.dat$means[, 2] - stroop.dat$means[, 1]
+q <- qnorm(1:length(diff)/(length(diff)+1))
+sd.bar <- sqrt(mean(rowSums(tapply(stroop.dat$dat$rt, list(stroop.dat$dat$sub, stroop.dat$dat$cond), var)/tapply(stroop.dat$dat$rt, list(stroop.dat$dat$sub, stroop.dat$dat$cond), length))))
+reg <- function(x) mean(diff) + sd.bar * x
+  abline(h = 0, col = "gray60", lwd = 1.5)
+  abline(h = mean(delta_i$delta), col = "gray60", lty = 2, lwd = 1.5)
+  points(x = 1: sum(delta_i$delta<0)
+       , y = delta_i$delta[delta_i$delta<0]
+       , col = "white"
+       , pch = 19)
+    points(x = 1: sum(delta_i$delta<0)
+       , y = delta_i$delta[delta_i$delta<0]
+       , col = "gray40")
+# lines(x = 1:length(diff), reg(q), col = "darkred")
+  
+
+  
+#   CI.mean <- t.test(stroop.dat$means[, 2], stroop.dat$means[, 1], within = TRUE)$conf.int[1:2]
+#   
+#     plotCI(x = 1
+#          , y = mean(delta_i$delta)
+#          , ui= CI.mean[2]
+#          , li= CI.mean[1]
+#          , add = TRUE
+#          , sfrac = 1/150
+#          , pch = NA
+#          , col = "gray50")
+#   
+fig.example <- 2
+fig <- 2
+
+stroop.dat$dat$y <- stroop.dat$dat$rt
+my.F <- myF(stroop.dat$dat)
+my.p <- 1 - pf(my.F, stroop.dat$I - 1, stroop.dat$N - stroop.dat$I*stroop.dat$J)
+```

@@ -1,0 +1,32 @@
+---
+title: "Individual differences, Parameter Estimation"
+author: "Haaf & Rouder""
+output:
+  pdf_document: papaja::apa6_pdf
+  html_document: default
+  word_document: papaja::apa6_word
+---
+
+```{r 'chainstabilityplot', child="../figures/chainstability.Rmd"}
+```
+
+Posterior distributions for all parameters in the unstructured, the common-effect and the null models were sampled with Markov chain Monte Carlo methods (MCMC).  In all cases, conditional posterior distributions of parameters may be derived straightforwardly from Bayes rule [@Jackman:2009; @Gelman:etal:2004; @Rouder:Lu:2005].  Priors were chosen to leverage conjugacy, and consequently in all cases posterior distributions may be sampled from known distributions as Gibbs steps [@Gelfand:Smith:1990].  This approach is implemented in the BayesFactor package in R [@R-BayesFactor].  There are alternative packages for computing posterior distributions such as STAN [eg. @R-rstan] and JAGS [@Love:JASP:2014]. These alternatives do a fine job as well, and estimation in this setting is computationally convenient.  The BayesFactor package is not as general as these alternatives, but it is perfectly tuned for the problem at hand.
+
+###Mixing
+MCMC chains are guaranteed to provide samples from the joint posterior of all parameters in the large-sample limit.  In practice, however, outputs from successive iterations are often correlated.  If this correlation is severe, then there is no guarantee that the posterior has been well explored.  This problem of excessive correlation, when it exists is known as a problem of *mixing*.  Chains without excessive correlation from iteration to iteration are said to mix well, chains with excessive correlation are said to mix poorly.
+
+MCMC chains mixed well for the three estimated models.  This rapid convergence is expected here as the models are linear and not overly saturated. The slowest converging parameters were the variances of the effects, $\eta^2$.  Figure `r fig.chainstability`A and B provide a snippet of a chain and the autocorrelation function, respectively, for this parameter for the unstructured model in the worst case across all data sets (which was from Data Set 1).  As can be seen, mixing is acceptable even in this worst case.  The correlations here are not consequential for long runs of several thousand iterations (our posterior estimates come from 20,000 iterations).  
+The mixing in the same case for Data Set 2 was considerably better.  Figure `r fig.chainstability`C and D show mixing for this Data Set, also is for $\eta^2$.  Even though this is the worst-case for the Data Set, the mixing here is quite good.
+
+###Results
+The critical parameters are the individuals' effects, $\theta_i$.  The posterior means of these parameters are shown in the right-hand columns in Figures `r fig.stroop`, `r fig.simon`, and `r fig.flanker` for the seven data sets.  The dark gray lines that have the largest spread are the observed effects, $d_i$, and these are included for comparison to the model estimates.  The points are the estimates $\theta_i$ from the unstructured model. The red horizontal line is the common effect estimate from the common-effect model $\calM_1$.  Note that the right-hand columns in the figures do not have the same scaling on the y-axis when comparing effects between different paradigms.
+
+There are three main findings:
+
+1.  There is a sizable degree of shrinkage in all seven data sets.  In all cases, much of the variation in the observed effects is due to sample variation at the trial level rather than true variation across individuals.  This shrinkage is especially striking for Data Set 1, 3, 5, and 7.
+
+2. According to the unstructured model, most individuals have positively-valued effects. This positivity holds even when the observed effects are negative.  This positivity is a direct result of shrinkage to the overall mean, which is positive for Data Sets 1 through 6.
+
+3. The hierarchical models provide a reasoned estimate of individual variation while simultaneously accounting for sample noise at the trial level.  The results are that there is dramatically less variation at the individual level.  Consequently, the effect size, the magnitidue of the mean effect relative to the variation in individuals, is larger after accounting for trial-by-trial variation.  For Data Set 1, for example, the observed effect size is `r round(ES.1, 2)` reflecting a mean effect of `r round(effect.1)` ms and an observed standard deviation around this mean of `r sd(means.1[, 2] - means.1[, 1]) * 1000` ms.  For the unstructured model estimates, in contrast, the effect size is `r round(new.es.1, 2)`, and this increase reflects the decreased variation in individuals' effects.  It is our belief that in within-subject designs, appropriately measured hierarchical model-based effect sizes are much larger than is typically reported. The observed and model-based effect sizes for all data sets are shown in Table `r tab.sum`.
+
+In addition to these three main findings, the severe limitations of estimation become apparent.  For our main question, "does everyone Stroop in the same direction," there is no single parameter that answers the question.  In fact, we cannot even note that for many of the graphs, all individual parameters are positive.  These parameter estimates are highly correlated due to the prior specification, and cannot be used en masse to draw any conclusion, certainly not by inspection.  This application shows that there are questions that cannot be addressed by estimation alone [@Morey:etal:2014 ].

@@ -1,0 +1,81 @@
+---
+title: "Individual differences, Trunc plot"
+author: "Haaf & Rouder""
+output:
+  pdf_document: papaja::apa6_pdf
+  html_document: default
+  word_document: papaja::apa6_word
+---
+```{r 'fig_1', fig.align='center', fig.height=3.5, fig.width=7, fig.cap="Hypothetical distribution of individuals' true effects (solid lines) and the resulting model on the average effect (dashed lines).  Panel A shows the usual case where individuals' effects are graded and there is no special role for the direction of the effect.  Panel B shows the ''Everone Stroops'' case where individuals' effects are constrained to be positive.  The resulting distribution for the average effect is the same for both cases"}
+x <- seq(-1.4, 2.5, .001)
+
+par(mfrow = c(1,2), mar=c(4,4.5,1,1), mgp = c(2,.7,0))
+
+y.norm <- dnorm(x, .5, .5)
+y.m.norm <- dnorm(x, .5, .125)
+plot(x
+     , y.m.norm
+     , type = 'l'
+     , lty = 2
+     , frame.plot = FALSE
+     , ylab = "Density"
+     , xlab = "Effect"
+     , yaxt = 'n'
+     , main = "A.")
+axis(side = 2, at = seq(0, 3, 1), las = 2)
+lines(x
+      , y.norm)
+abline(v = 0
+       , col = "gray80")
+#lines(x = c(.3, .3), y = c(0, max(y.norm)), lwd = 1.5)
+lines(x = c(.5, .5), y = c(0, max(y.m.norm)), lwd = 1.5)
+
+means <- search.means(c(0,1), .5, cutoff = .00001, a = 0, b = Inf, sigma = .4)
+sd.t <- search.var(c(0, 1), .4, .00001, a = 0, b = 100000000000000, mu = .5)
+y.t.norm <- dtnorm(x, means, sd.t, lower = 0)
+plot(x
+     , y.m.norm
+     , type = 'l'
+     , lty = 2
+     , frame.plot = FALSE
+     , ylab = "Density"
+     , xlab = "Effect"
+     , yaxt = 'n'
+     , main = "B.")
+axis(side = 2, at = seq(0, 3, 1), las = 2)
+lines(x
+      , y.t.norm)
+abline(v = 0
+       , col = "gray80")
+# lines(x = c(means, means), y = c(0, max(y.t.norm)), lwd = 1.5)
+lines(x = c(.5, .5), y = c(0, max(y.m.norm)), lwd = 1.5)
+
+# lower <- c(-Inf, seq(-.6, .14, .005))
+#   for(i in 1:length(lower)){
+#     png(filename = paste0("trunc", sprintf("%04d", i), ".png"))
+#     means <- search.means(c(0,1), .3, cutoff = .00001, a = lower[i], b = Inf, sigma = .2)
+#     low <- ifelse(lower[i]<(-1000000000000000), (-1000000000000000), lower[i])
+#     sd.t <- search.var(c(0, 1), .2, .00001, a = low, b = 100000000000000, mu = .3)
+#     y.t.norm <- dtnorm(x, means, sd.t, lower = lower[i])
+#     y.t.m.norm <- dnorm(x, .3, .02)/5
+#     plot(x
+#          , y.t.m.norm
+#          , type = 'l'
+#          , lty = 2
+#          , frame.plot = FALSE
+#          , ylab = "Density"
+#          , xlab = "Effect")
+#     lines(x
+#           , y.t.norm)
+#     abline(v = 0
+#            , col = "gray80")
+#     lines(x = c(means, means), y = c(0, max(y.t.norm)), lwd = 1.5)
+#     lines(x = c(.3, .3), y = c(0, max(y.t.m.norm)), lwd = 1.5)
+#     legend("topleft", legend = paste("Truncation at", round(lower[i], 2)), bty = "n")
+#     legend(x = .25
+#            , y = 3.8
+#            , legend = expression(x5)
+#            , bty = "n")
+#     dev.off()
+#   }
+```
