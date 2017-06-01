@@ -1,0 +1,61 @@
+---
+title: "Individual differences, model analyses"
+author: "Haaf & Rouder""
+output:
+  pdf_document: papaja::apa6_pdf
+  html_document: default
+  word_document: papaja::apa6_word
+---
+
+```{r 'convergence-plot', fig.height= 4, fig.width= 4, fig.cap= "Examination of mixing in MCMC chains for Data Sets 1 and 2. Panels A (Data Set 1) and C (Data Set 2) show snippets of chains for $\\eta^2$, the slowest converging parameter, for the unstructured model. Panels B and D show the autocorrelation function for the same two cases. Mixing is quite good for Data Set 2 and acceptable for Data Set 1.", fig.align='center'}
+keep.plot <- 1001:4000
+eta2_1 <- bf.1$est.full[keep.plot, 248]
+eta2_2 <- bf.2$est.full[keep.plot, 82]
+
+##Plot
+layout(mat = matrix(1:4, nrow = 2, byrow = TRUE))
+par(mar=c(3,3.5,2,1), mgp = c(2,1,0))
+
+plot(keep.plot
+     , eta2_1
+     , typ = 'l'
+     , ylab = expression(eta^2)
+     , xlab = "Chain"
+     , axes = FALSE
+     , frame.plot = FALSE
+     , main = "A.")
+axis(side = 2
+     , at = seq(round(min(eta2_1), 2), round(max(eta2_1)- .01, 2), .02)
+     )
+axis(side = 1
+     , at = seq(1000, 4000, 1500)
+     )
+acf(eta2_1
+    , ylab = expression(paste("Autocorrelation for ",eta^2)) 
+    , frame.plot = FALSE
+    , lag.max = 60
+    , main = "B.")
+title(main = "B.")
+
+plot(keep.plot
+     , eta2_2
+     , typ = 'l'
+     , ylab = expression(eta^2)
+     , xlab = "chain"
+     , axes = FALSE
+     , frame.plot = FALSE
+     , main = "C.")
+axis(side = 2
+     , at = seq(round(min(eta2_2) + .01, 2), round(max(eta2_2), 2), .02)
+     )
+axis(side = 1
+     , at = seq(1000, 4000, 1500)
+     )
+acf(eta2_2
+    , ylab = expression(paste("Autocorrelation for ", eta^2))
+    , frame.plot = FALSE
+    , lag.max = 60
+    , main = "D.")
+title(main = "D.")
+```
+

@@ -1,0 +1,110 @@
+---
+title: "Individual differences, Models"
+author: "Haaf & Rouder""
+output:
+  pdf_document: papaja::apa6_pdf
+  html_document: default
+  word_document: papaja::apa6_word
+---
+
+```{r 'modelplot', child="../figures/modelplot.Rmd"}
+```
+
+We consider experiments with two conditions, which are generically termed *control* and *treatment* here.  To model individual variability in massively repeated designs, we adopt the following notation:  Let $Y_{ijk}$ be a response variable, say response time (RT), for the $k$th replicate for the $i$th participant, $i=1,\ldots,I$ in the $j$th condition, $j=1,2$ with $k=1,\ldots,K_{ij}$.  We place a linear model on $Y_{ijk}$:
+\begin{equation} \label{base1}
+Y_{ijk} \stackrel{iid}{\sim} \mbox{Normal}\left(\mu+\alpha_i+x_j\theta_i,\sigma^2\right).
+\end{equation}
+Here, the term $\mu+\alpha_i$ serve as intercepts with $\mu$ being the grand mean of intercepts and $\alpha_i$ being individual deviations.  The term $x_j$ codes the condition, with $x_j=0$ for the control condition and $x_j=1$ for the treatment condition.  The effect is the slope, $\theta_i$, and the collection of these parameters across participants are the target of interest. And finally, $\sigma^2$ is the variance of the responses.
+
+We develop a series of four mixed models on these effect parameters.  At one end of the spectrum, the most general model with the least constraint simply posits that the individual effects follow a normal distribution with full support.  At the other end, the most constrained model specifies that there is no effect for every individual. The following models are ordered from the least constrained to the most, and the full set provides a useful tool for assessing the constraint in effects. We then use Bayesian model comparison, discussed subsequently, to assess what level of constraint is most appropriate for a set of data.
+
+## The Unstructured Model
+The unstructured model is denoted $\calM_u$ and places no order or equality constraints on the collection of effects: 
+
+\[
+  \begin{array}{llr}
+\calM_u: && \theta_i \stackrel{iid}{\sim} \mbox{Normal}(\nu,\eta^2),\\
+\end{array}
+\]
+
+where $\nu$  and $\eta^2$ are population-level parameters describing the mean and variance of effects across the population. This model is quite flexible in that all combinations of individual effects are plausible. Figure `r fig.modelplot`$\mbox{A}_1$ shows this flexiblity for two participants.  The true-effect value for the first individual is shown on the $x$-axis, the true-effect value for the second is shown on the $y$-axis.  As can be seen, combinations of effects in the same and opposite directions for the two individuals have plausibility.  In application, $\nu$ and $\eta^2$ are treated as parameters that are free to vary as a function of data. The specifications of of these parameters are described in the section "Additional specification".
+
+##The Positive-Effects Model
+The positive-effects model, denoted $\calM_+$, captures the constraint that each individual has a true effect in the predicted direction.
+\[
+  \begin{array}{llr}
+\calM_+: & & \theta_i \stackrel{iid}{\sim} \mbox{Normal}_+(\nu,\eta^2),\\
+  \end{array}
+\]
+where $\mbox{Normal}_+$ denotes a truncated normal distribution with a lower bound at zero.  The probability density distribution of $\theta_i$ for two participants is shown in Figure `r fig.modelplot`$\mbox{B}_1$.  Note that the distribution in the figure is darker, that is more *dense*, than the distribution in Figure `r fig.modelplot`$\mbox{A}_1$. The reason for that is the reduction of space. The space of valid parameter values in this illustration is one fourth the space of valid parameter values in the unstructured model as the positive-effect model occupies only one of the four quandrants.  This reduction of space relative to the unstructued model becomes larger as additional participants are considered.
+
+##The Common-Effect Model
+The common-effect model, denoted $\calM_1$, captures the constraint that each individual has the same effect:  
+\[
+  \begin{array}{llrr}
+\calM_1: & & \theta_i = \nu.\\
+  \end{array}
+\]
+
+This common-effect model seems *a priori* unlikely as it posits a constant effect, for example a common priming effect, across all individuals.  Yet, we include it here for two reasons:  First, it is a logical null that can be used to benchmark claims of individual differences.  If this common-effects model provides a superior description and yet we view it as unlikely, we may then turn our attention to the adequacy of the design to capture individual differences.  In this regard, the model serves as a valuable design check. Second, we think commonalities should be given more *a priori* weight.  Important invariances, even if they hold approximately, serve as good structure to build theory.  Hence, if individual effect vary to a very small extend, $\calM_1$ could still be the preferred model.
+
+For this model, $\calM_1$, the distribution of $\theta_i$ for two participants follows the diagonal as shown in Figure `r fig.modelplot`$\mbox{C}_1$. The geometry of the constraint reduces the volume of the distributions of the previous models to a single line.
+
+##The Null Model
+The null model, denoted $\calM_0$, specifies that each participant's true effect is identically zero
+\[
+  \begin{array}{llr}
+\calM_0: & & \theta_i = 0.\\
+  \end{array}
+\]
+As everyone's effect is fixed to zero in this model, the distribution of $\theta_i$ for two participants shown in Figure `r fig.modelplot`$\mbox{D}_1$ is simply a point at zero. 
+
+##Additional Specifications
+
+We analyze the above four models in a Bayesian framework.  Additional specifications are needed for parameters $\mu$, the grand mean of intercepts, $\sigma^2$, the variance of responses in each participant-by-condition cell, $\nu$, the mean of effects, $\eta^2$, the variance of effects, and the collection of $\alpha_i$, the individual intercepts.  Our choices are motivated by the following two considerations: First, we adopt specifications that lead to computationally convenient algorithms for model comparison.  Second, we adopt specifications that adhere to a subjective Bayesian philosophy [@DeGroot:1982; @Goldstein:2006; @Rouder:etal:2016b], where priors are weakly informative and reflect a reasonable ranges of beliefs.   Here, the prior settings reflect our *a priori* general substantive knowledge of generic data observed in these types of tasks. 
+
+We adopt a Zellner $g$-prior specification [@Zellner:1986].  This specification is well studied and has been influential in linear modeling in statistics [e.g. @Bayarri:Garcia-Donato:2007; @Liang:etal:2008; @overstall2010default].  It underlies most Bayes factor development in psychology for regression and ANOVA models [@Rouder:etal:2009a; @Rouder:etal:2012; @Rouder:Morey:2012; @Wetzels:Wagenmakers:2012].  In this context, we follow the ANOVA development by @Rouder:etal:2012 as follows:
+
+In the $g$-prior specification, non-informative reference priors are placed on parameters that are common to all models. In this case, this specification applies to $\mu$ and $\sigma^2$:
+
+\[
+f(\mu, \sigma^2) \propto \frac{1}{\sigma^2}.
+\]
+
+Next, consider the following specification on each individual's baseline, $\alpha_i$:
+\begin{equation} \label{alpha}
+\alpha_i | g_{\alpha},\sigma^2 \stackrel{iid}{\sim} \mbox{Normal}(0, \sigma^2 g_{\alpha}).
+\end{equation}
+In the $g$-prior specification, the prior on effect parameters, in this case $\alpha_i$, is a function of $\sigma^2$, the overall variance of responses, and a new parameter, $g_\alpha$.  The role of $\sigma^2$ in the prior may not be transparent.  It is helpful to present an equivalent specificiation in *standardized effect sizes* rather than in effects.  Let $\alpha_i^*$ be the $i$th individual's intercept effect size, where $\alpha_i^*=\alpha_i/\sigma$.  The model reparameterized in this effect-size parameter may be given as $Y_{ijk} \sim \mbox{Normal}(\mu+\sigma\alpha_i^*+x_j\theta_i,\sigma^2)$, where the prior on $\alpha_i^* \sim \mbox{Normal}(0, g_{\alpha})$.  Here we see there is no mystery placing the $\sigma^2$ in the prior variance in (\ref{alpha}).  It allows us to focus on $g_\alpha$, which is the prior variance on effect sizes.  Effect sizes are convenient because psychologists have developed extensive intuition about how these should vary across manipulations and domains.
+
+In $g$-prior specification, priors may be placed on the $g$ parameter.  The usual specification [@Zellner:Siow:1980], which we follow, is a scaled inverse-$\chi^2$ with one degree-of-freedom.[^3] Using the inverse-$\chi^2$ as the prior distribution on $g$ is less assumptive and represents the analyst's uncertainty.
+\[
+g_{\alpha} \sim \mbox{Inverse-$\chi^2$} (r_{\alpha}^2).
+\]
+The quantity $r_{\alpha}^2$ is a scaling setting on variability (in standardized units), and it must be set *a priori*. The distribution on $g$ is fat-tailed, and adding any additional uncertainty, say by adding variability to the scale, may result in posteriors with poor properties [@Hobert:Casella:1996].
+
+How to set $r_\alpha^2$?  We first start by considering the square-root, $r_\alpha$ as this quantity is on the scale of effect sizes. The meaning of this scale is shown in  Figure `r fig.marginals`A.  The figure shows a broad bivariate density centered at $(0, 0)$. This density is the marginal prior for two different individuals' intercepts $\alpha_1$ and $\alpha_2$. The centering at zero assures that $\mu$ is the grand mean. The value of $r_\alpha$ sets the scale, and the plot shows the case for $r_\alpha=1$. We show the values in effect-size units (bottom and left axes), and the expectation is that variability in baseline across people is about the same as the variability of repeated trials.  Why did we choose this setting?  In our experience with these types of tasks, the standard deviation of repetitions for a participant within a condition is around  200 ms to 400 ms for repeated trials [@Luce:1986]. We do not use this value to set $\sigma$ though it is an estimate.  But we do use it to think about the setting for $r_\alpha$.  Also in our experience with these types of tasks, people's means also tend to vary from about 200 ms to 400 ms.   For example, one person's mean might be 500 ms while another's might be 800 ms.  With this knowledge in mind, we set $r_{\alpha}$ to 1.0, encoding the belief that the variation of individual baselines has a characteristic scale of $\sigma$.  These prior settings are not so critical but they should be reasonable.  We explore their effects on inference subsequently.  The same rationale may be used in other domains---researchers should have a defensible notion about what ranges of effects sizes they think are reasonable.
+
+We use a similar rationale and $g$-prior structure on parameter $\nu$:
+\begin{align*}
+\nu|g_{\nu} &\sim \mbox{Normal}(0,\sigma^2g_{\nu})\\
+g_{\nu} &\sim \mbox{Inverse-$\chi^2$}(r^2_{\nu}).\\
+\end{align*}
+
+To set values of $r_\nu$, we note that average effects in tasks like these tend to be on the order of tens of milleseconds, and we use 50 ms, or one sixth of the standard deviation for repeated trials, as the scale of the inverse-$\chi^2$ prior ($r^2_\nu = (1/6)^2$). 
+
+To complete the specification, we let $g_\theta = \eta^2/\sigma^2$, the standardized variance of the effects. This allows for a $g$-prior specification of $\theta_i$, similar to the specification of $\alpha_i$. As before, the prior on $g_\theta$ is
+\[
+g_\theta \sim \mbox{Inverse-$\chi^2$}(r^2_{\theta}).
+\]
+To set $r_\theta$ we consider individual variability around the mean effect.  It is difficult to know what the true variation of individual effects is because the observed variability is confounded by trial noise.  Our working assumption is that the scale should be also on the order of tens of milleseconds. Moreover we expect the variability to be no larger than the size of the average effect. Using this rationale, we set the scale on the standard deviation of individual differences to be 30ms, or one tenth of the standard deviation ($r^2_\theta = (1/10)^2$).  
+
+Figure `r fig.marginals`B shows the marginal priors for two individuals' effects, $\theta_1$ and $\theta_2$. The correlation between $\theta_1$ and $\theta_2$ in the marginal priors arises from the hierarchical nature of the specification in the unstructued and positive models.  The variability in $\nu$, is shared between the two individuals and induces the correlation. The degree of correlation is a function of the amount of shared variance, reflecting the setting of $r_\nu$, and the amount of unique variance, reflecting the setting of $r_\theta$.  
+
+It is important to know how these substantive choices for setting $r_\alpha$, $r_\nu$, and $r_\theta$ affect model comparison results.  We visit this issue after presenting the results of the real-world application.
+
+
+[^3]: The density of the inverse $\chi^2$ distribution is $f(\sigma^2;b)=\frac{\sqrt{b}}{\Gamma(1/2)}\left(\sigma^2\right)^{-3/2}\mbox{exp}\left(\frac{-b}{\sigma^2}\right)$, where $b$ is a  scale parameter.
+
+[^4]: The density of $\eta$ is obtained by the usual transformation-of-variables techniques [@Hogg:Craig:1978], and is given by $g(\eta;c,d,e)=2\eta\times f(\eta^2;c,d)/(1-F(e^2;c,d))$ where $f$ and $F$ are the density and cumulative distribution functions of the inverse gamma, and $c$ and $d$ are shape and scale parameters on $\eta^2$, and $e^2$ is the lower limit of $\eta^2$.
+

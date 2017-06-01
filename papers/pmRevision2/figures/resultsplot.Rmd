@@ -1,0 +1,108 @@
+---
+title: "Individual differences, Analysis figure"
+author: "Haaf & Rouder""
+output:
+  pdf_document: papaja::apa6_pdf
+  html_document: default
+  word_document: papaja::apa6_word
+---
+
+```{r 'stroop_plot_model_comp', fig.height= 8, fig.width= 7, fig.cap= "{\\footnotesize Empirical and Bayesian analyses for the Stroop paradigm Data Sets 1-3. Each row shows one data set. The left column shows the ordered observed effects, $d_i$, as solid points. The shaded area denotes the associated 95\\% confidence intervals, and the dashed line is the mean effect. The right column shows the ordered Bayesian estimates of individual effects, $\\theta_i$. The squares and diamonds are the estimates from the unstructured and postive-effect models, respectively, and in most cases these overlap considerably. The shaded area denotes the associated 95\\% credible interval for the unstructured estimate. The dashed line is the estimate from the constant-effect model. The observered effects, $d_i$ are included as small dots for comparison. In Panel $\\mbox{A}_2$, the Bayesian analysis for Data Set 1, there is a sizable difference between the observed and estimated effects, and this difference is indicative of hierarchical shrinkage. Almost all the variability in the individual effects is seemingly from sample noise.}", fig.align='center'}
+layout(mat = matrix(1:6, nrow = 3, byrow = TRUE))
+par(mar=c(3,3,1,1), mgp = c(2,1,0))
+
+#stroop Oberauer
+# plot_freq_bayes_intern(stroop.dat$dat
+#                               , sub_var = "sub"
+#                               , cond_var = "cond"
+#                               , congruent = 1
+#                               , rt_var = "rt"
+#                               , trial_var = "trial"
+#                               , thet.n = stroop.comp$norm.model$theta
+#                               , thet.t = stroop.comp$trunc.model$theta
+#                               , thet.1 = stroop.comp$posone.model$theta
+#                               , keep = keep
+#                               , experiment = "Stroop Oberauer"
+#                               , bfs = as.numeric(stroop.comp$bfs[2, 1:3])
+#                        , f = f.stat.stroop
+#                        , trunccount = stroop.comp$trunc.model$counter
+#                        , poscount = stroop.comp$norm.model$count.pos
+#                        , eval = stroop.comp$norm.model$eval
+#   )
+
+#stroop Oberauer
+plot_delta_i(stroop.dat$dat
+             , "sub"
+             , "cond"
+             , "rt"
+             , "trial"
+             , congruent = 1
+             , main = expression(A[1]* "."))
+ES.stroop <- t.test(stroop.dat$means[, 2], stroop.dat$means[, 1], paired = TRUE)$statistic/sqrt(121)
+
+plot_freq_bayes(stroop.dat$dat
+                              , sub_var = "sub"
+                              , cond_var = "cond"
+                              , congruent = 1
+                              , rt_var = "rt"
+                              , trial_var = "trial"
+                              , thet.n = stroop.comp$norm.model$theta
+                              , thet.t = stroop.comp$trunc.model$theta
+                              , thet.1 = stroop.comp$posone.model$theta
+                              , keep = keep
+                              , bfs = as.numeric(stroop.comp$bfs[2, c(3, 2, 1)])
+                              , main = expression(A[2] * ".")
+  )
+
+#stroop Pratte 1
+f.stat.stroop.p1 <- myF(stroop.pexp1.dat$dat)
+plot_delta_i(stroop.pexp1.dat$dat
+             , "sub"
+             , "cond"
+             , "rt"
+             , "trial"
+             , congruent = 1
+             , expression(B[1] *"."))
+
+plot_freq_bayes(stroop.pexp1.dat$dat
+                              , sub_var = "sub"
+                              , cond_var = "cond"
+                              , congruent = 1
+                              , rt_var = "rt"
+                              , trial_var = "trial"
+                              , thet.n = stroop.pexp1.comp$norm.model$theta
+                              , thet.t = stroop.pexp1.comp$trunc.model$theta
+                              , thet.1 = stroop.pexp1.comp$posone.model$theta
+                              , keep = keep
+                              , bfs = as.numeric(stroop.pexp1.comp$bfs[2, c(3, 2, 1)])
+                , main = expression(B[2]*".")
+  )
+#stroop Pratte 2
+plot_delta_i(stroop.pexp2.dat$dat
+             , "sub"
+             , "cond"
+             , "rt"
+             , "trial"
+             , congruent = 1
+             , expression(C[1]*"."))
+
+plot_freq_bayes(stroop.pexp2.dat$dat
+                              , sub_var = "sub"
+                              , cond_var = "cond"
+                              , congruent = 1
+                              , rt_var = "rt"
+                              , trial_var = "trial"
+                              , thet.n = stroop.pexp2.comp$norm.model$theta
+                              , thet.t = stroop.pexp2.comp$trunc.model$theta
+                              , thet.1 = stroop.pexp2.comp$posone.model$theta
+                              , keep = keep
+                              , bfs = as.numeric(stroop.pexp2.comp$bfs[2, c(3, 2, 1)])
+                , main = expression(C[2]*".")
+  )
+
+
+fig <- 4
+
+##TODO
+ES_stroop = 0
+```

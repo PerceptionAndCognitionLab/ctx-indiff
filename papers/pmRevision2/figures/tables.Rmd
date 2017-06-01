@@ -1,0 +1,185 @@
+
+```{r sum-table, echo = FALSE, results = "asis"}
+row.names <- c("\\bf{Participants}"
+               , "\\bf{Trials Per Cell}"
+               , "\\bf{Mean Effect (ms)}"
+               , "\\bf{Observed effect size}"
+               , "\\bf{Model-based effect size}"
+               , "\\bf{F-value}"
+               , "\\bf{p-value}"
+               , "\\bf{Preferred model (BF)}")
+st <- c(121, 48
+        , round(effect.1), round(ES.1, 2), round(new.es.1, 2)
+        , round(f.stat.1, 2), paste(p.1), paste("$\\calM_+$")
+        , 38, 168
+        , round(effect.2), round(ES.2, 2), round(new.es.2, 2)
+        , round(f.stat.2, 2), paste(p.2), paste("$\\calM_+$")
+        , 38, 180
+        , round(effect.3), round(ES.3, 2), round(new.es.3, 2)
+        , round(f.stat.3, 2), paste(p.3), paste("$\\calM_1$")
+)
+
+si <- c(121, paste("$\\approx$", 100)
+            , round(effect.4), round(ES.4, 2), round(new.es.4, 2)
+            , round(f.stat.4, 2), paste(p.4), paste("$\\calM_+$")
+            , 38, 252
+            , round(effect.5), round(ES.5, 2), round(new.es.5, 2)
+            , round(f.stat.5, 2), paste(p.5), paste("$\\calM_u$")
+            , 38, 180
+            , round(effect.6), round(ES.6, 2), round(new.es.6, 2)
+            , round(f.stat.6, 2), paste(p.6), paste("$\\calM_u$")
+)
+
+fl <- c(121,  48
+            , round(effect.7), round(ES.7, 2), round(new.es.7, 2)
+            , round(f.stat.7, 2), paste(p.7), paste("$\\calM_0$"))
+
+mat <- matrix(c(row.names, st, si, fl), nrow = length(row.names))
+colnames(mat) <- c(" ", paste0("\\bf{", 1:7, "}"))
+
+apa_table(mat
+          , note = "The model-based effect size is from the unstructured model (see text).  The $F$- and $p$-value are appropriate frequentist tests for individual differences (see Appendix A).  Data set 4 has unequal trial numbers per condition: 50 incongruent and 150 congruent trials."
+          , caption = "Characteristics of the Data Sets"
+          , align = c("l", "r", "r", "r", "r", "r", "r", "r")
+          , col_spanners = list("\\bf{Data Set}" = c(2, 8))
+          )
+```
+
+```{r bf-table, echo = FALSE, results = "asis"}
+row.names <- c("$\\calM_0$", "$\\calM_1$", "$\\calM_+$", "$\\calM_u$")
+bfs.st <- c(paste(1, "to", "$10^{62}$")
+            , paste(1, "to", round(bf.1$bf.pf * 1/bf.1$bf.1f))
+            , paste("$*$")
+            , paste(1, "to", round(bf.1$bf.pf))
+            
+            , paste(1, "to", "$10^{75}$")
+            , paste(1, "to", "$10^{7}$")
+            , paste("$*$")
+            , paste(1, "to", round(bf.2$bf.pf))
+            
+            , paste(1, "to", round(bf.3$bf.1f * 1/bf.3$bf.0f))
+            , paste("$*$")
+            , paste(1, "to", round(bf.3$bf.1f * 1/bf.3$bf.pf, 2))
+            , paste(1, "to", round(bf.3$bf.1f, 2))
+)
+
+bfs.si <- c(paste("$\\approx 0$")
+            , paste(1, "to", "$10^{19}$")
+            , paste("$*$")
+            , paste(1, "to", round(bf.4$bf.pf))
+            
+            , paste(1, "to", "$10^7$")
+            , paste(1, "to", round(1/bf.5$bf.1f))
+            , paste(1, "to", round(1/bf.5$bf.pf))
+            , paste("$*$")
+
+            , paste(1, "to", "$10^{21}$")
+            , paste(1, "to", round(1/bf.6$bf.1f))
+            , paste(1, "to", round(1/bf.6$bf.pf, 1))
+            , paste("$*$")
+)
+
+bfs.fl <- c(paste("$*$")
+            , paste(1, "to", round(bf.7$bf.0f * 1/bf.7$bf.1f))
+            , paste("$\\approx 0$")
+            , paste(1, "to", round(bf.7$bf.0f)))
+
+bfs <- matrix(c(row.names, bfs.st, bfs.si, bfs.fl), nrow = length(row.names))
+colnames(bfs) <- c(" ", paste0("\\bf{", 1:7, "}"))
+
+apa_table(bfs
+          , note = "Asterisks mark the preferred model for each data set.  The remaining values are the Bayes factors between a model and the preferred model for each data set."
+          , caption = "Bayes factor model comparison"
+          , align = c("l", "c", "c", "c", "c", "c", "c", "c")
+          , col_spanners = list("\\bf{Data Set}" = c(2, 8))
+          )
+```
+
+```{r sensitivity-tab, echo = FALSE, warning=FALSE, message=FALSE, cache = TRUE, results = "asis"}
+prep.1 <- prep.models(stroop$sub, stroop$cond)
+set.seed(123)
+half <- makeBF(stroop$rt, 1/12, .05, prep = prep.1, keep = keep)
+# save(half, file = "../chains/halfBF.RData")
+# load(file = "../chains/halfBF.RData")
+double <- makeBF(stroop$rt, 1/3, .2, prep = prep.1, keep = keep)
+# save(double, file = "../chains/doubleBF.RData")
+# load(file = "../chains/doubleBF.RData")
+equal <- makeBF(stroop$rt, 1/3, 1/3, prep = prep.1, keep = keep)
+# save(equal, file = "../chains/equalBF.RData")
+# load(file = "../chains/equalBF.RData")
+one <- makeBF(stroop$rt, 1, 1, prep = prep.1, keep = keep)
+# save(one, file = "../chains/oneBF.RData")
+# load(file = "../chains/oneBF.RData")
+big.1 <- makeBF(stroop$rt, 1, .1, prep = prep.1, keep = keep)
+# save(big.1, file = "../chains/big1BF.RData")
+# load(file = "../chains/big1BF.RData")
+big.2 <- makeBF(stroop$rt, 1/6, 1, prep = prep.1, keep = keep)
+# save(big.2, file = "../chains/big2BF.RData")
+# load(file = "../chains/big2BF.RData")
+new.sd <- 1:7
+new.sd[1] <- bf.1$sd * 1000
+new.sd[2] <- half$sd * 1000
+new.sd[3] <- double$sd * 1000
+new.sd[4] <- equal$sd * 1000
+new.sd[5] <- one$sd * 1000
+new.sd[6] <- big.1$sd * 1000
+new.sd[7] <- big.2$sd * 1000
+
+bfs.sens <- rbind(c(bf.1$bf.1f, bf.1$bf.pf)
+                  , c(half$bf.1f, half$bf.pf)
+                  , c(double$bf.1f, double$bf.pf)
+                  , c(equal$bf.1f, equal$bf.pf)
+                  , c(one$bf.1f, one$bf.pf)
+                  , c(big.1$bf.1f, big.1$bf.pf)
+                  , c(big.2$bf.1f, big.2$bf.pf))
+
+sd_mu <- paste0(c(.167, .08, .33, .33, 1, 1, .167)
+                , " ("
+                , 300* c(1/6, 1/12, 1/3, 1/3, 1, 1, 1/6)
+                , "ms)")
+sd_theta <- paste0(c(.1, .05, .2, .33, 1, .1, 1)
+                   , " ("
+                   , 300* c(.1, .05, .2, 1/3, 1, .1, 1)
+                   , "ms)")
+
+bfs.u <- paste("to", rep(1, 7))
+bfs.sens <- round(bfs.sens, 2)
+bfs.sens[c(5, 7), 1] <- "$10^7$"
+bfs <- matrix(paste(bfs.sens, bfs.u), ncol = 2)
+tab <- cbind(c("1", 2:7), sd_mu, sd_theta, paste(round(new.sd), "ms"), bfs)
+colnames(tab) <- c(" ", "$r_\\nu$", "$r_\\theta$", "SD($\\theta_i$)", "$B_{1u}$","$B_{+u}$")
+
+apa_table(tab
+          , align = c("l", "c", "c", "r", "r", "r")
+          , note = "Sensitivity analysis of Bayes factor computation for Data Set 1. Shown are the Bayes factors and the standard deviations for estimates of $\\theta_i$ from the unstructured model. For ease of comparison, the values in parentheses show translations into variability when an overall standard deviation of 300ms is assumed. The first row shows the settings used for the analysis."
+          , caption = "Sensitivity of Bayes factors to scale settings"
+)
+```
+
+```{r delete-table, echo = FALSE, results = "asis"}
+row.names <- c("\\bf{Criterion I.}"
+               , "\\bf{Criterion II.}"
+               , "\\bf{Criterion III.}"
+	       , "\\bf{Total}")
+st <- c(clean.crit.1$p.time, clean.crit.1$p.acc, "---", clean.crit.1$p.total
+        , clean.crit.2$p.time, clean.crit.2$p.acc, clean.crit.2$p.trial, clean.crit.2$p.total
+        , clean.crit.3$p.time, clean.crit.3$p.acc, clean.crit.3$p.trial, clean.crit.3$p.total
+)
+
+si <- c(clean.crit.4$p.time, clean.crit.4$p.acc, "---", clean.crit.4$p.total
+        , clean.crit.5$p.time, clean.crit.5$p.acc, clean.crit.5$p.trial, clean.crit.5$p.total
+        , clean.crit.6$p.time, clean.crit.6$p.acc, clean.crit.6$p.trial, clean.crit.6$p.total
+)
+
+fl <- c(clean.crit.7$p.time, clean.crit.7$p.acc, "---", clean.crit.7$p.total)
+
+mat <- matrix(c(row.names, st, si, fl), nrow = length(row.names))
+colnames(mat) <- c(" ", paste0("\\bf{", 1:7, "}"))
+
+apa_table(mat
+          , note = "The three criteria for exclusion are: I. All incorrect trials. II. All trials with RTs less than .2 s and greater than 2 s. III. The first five trials in each experimental block."
+          , caption = "Percentage of excluded observations."
+          , align = c("l", "r", "r", "r", "r", "r", "r", "r")
+         , col_spanners = list("\\bf{Data Sets}" = c(2, 8))
+          )
+```

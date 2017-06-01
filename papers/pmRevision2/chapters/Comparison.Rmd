@@ -1,0 +1,30 @@
+---
+title: "Comparison"
+author: "Julia Haaf and Jeff Rouder"
+date: "November 2, 2016"
+output: html_document
+---
+
+```{r 'savagedickey', fig.height= 3, fig.width= 6, echo = FALSE, fig.align='center'}
+par(mar=c(3,3,1,1), mgp = c(2,1,0), xpd = FALSE, mfrow = c(1, 2))
+x <-seq(-.3, .3, .001)
+y.prior <- dnorm(x, .0, .45^2)
+y.posterior1 <- dnorm(x, .03, .2^2)
+y.posterior2 <- dnorm(x, .1, .2^2)
+
+dens.post.A <- y.posterior1[301]
+dens.post.B <- y.posterior2[301]
+dens.prior <- y.prior[301]
+BF.A <- dens.post.A/dens.prior
+BF.B <- dens.post.B/dens.prior
+```
+
+To compare the four models, we use the Bayes factor approach discussed previously.  The values for all seven data sets are provided in Table `r tab.bf`. The asterisk in each column marks the preferred model for each data set. The values in the table are the Bayes factor between the respective model and the preferred model. For example, for Data Set 1, the positive-effects model is the preferred model. The table shows how much worse the other models perform compared to the preferred one. The Bayes factor for the runner-up, the common-effect model, over the positive-effects model for Data Set 1 is 1-to-11. The Bayes factor for the unstructured model over the positive-effects model is 1-to-12 for the same data set. These Bayes factors indicate that the two models, $\calM_1$ and $\calM_u$, predict the data worse than the positive-effects model by about an order of magnitude. The Bayes factor for the null model is much worse, $B_{0+} = 10^{-62}$.
+
+There are two major findings:
+
+1.  The preferred model varies across the tasks.  For the Stroop tasks, the positive-effects and the common effect models are preferred, indicating that all people Stroop in the same, expected direction. For the Simon tasks, in contrast, the unstructured model was slightly preferred for two of the three sets. This result provides modest evidence that perhaps some people truly have reverse Simon effects, where spatially incompatible responses are speeded relative to spatially compatible ones. For the Flanker task, there was very little effect in the data and, not surprisingly, the null model was preferred.
+
+2. In Data Sets 3 and 7 there is no evidence for individual variablility. In these sets the mean effect is quite small and presumably any true individual differences, should they exist, would even be smaller. Hence, finding them would require larger numbers of trials per individual. The combination of the estimation results and the Bayes factor model comparisons provide the following interpretation: Although there is far less variability in true individual effects than in observed effects, the degree of true variation is nonetheless substantial for five of the seven data sets. Also, the concordance between shrinkage in estimation and the Bayes factors is noteworthy---the greater the shrinkage, the better the relative performance of the common-effect model to the unstructured and positive-effects models.
+
+There is also a subtle paradox to reconcile.  Consider the results of Data Set 5, the Simon experiment in Figure `r fig.simon`$\mbox{B}_2$.  Here we see that all the hierarchical model estimates of the effect are positive for all individuals.  Yet, the Bayes factor analysis indicates that the unstructured model is preferred to the positive model, albeit slightly.  The combination of results may strike some as paradoxical---how can all estimates be positive and yet the positive model not be preferred?  The key to resolving this paradox is to note that these estimates are not independent.  They are heavily influenced by the mean effect, $\nu$. This influence is a desirable property in hierarchical modeling, and its benefitial effect is to smooth or regularize each individual's estimate.  While these estimates are our best point estimate of individuals' effects, they do not preserve global properties, such as whether all are positive.  The only way we know to assess these global properties is through Bayes factors, which are the direct and immediate consequences of Bayes rule for the questions we ask.
