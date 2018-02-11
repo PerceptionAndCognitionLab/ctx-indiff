@@ -1,4 +1,4 @@
-source('extendAssign.R')
+source_url("https://raw.githubusercontent.com/PerceptionAndCognitionLab/ctx-indiff/public/shared/functions/extendAssign.R")
 
 
 myF=function(dat)
